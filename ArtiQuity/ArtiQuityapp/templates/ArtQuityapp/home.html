@@ -1,11 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtiQuity - Empower Your Artistic Journey</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static './ArtQuityapp/style.css' %}">
+</head>
 
-    <head>
-        {% load static %}
-        <link rel="stylesheet" href="{%static 'ArtQuityapp/style.css' %}">
-    </head>
-   <body>
-    Welcome to ArtiQuity !!!!!
-   </body>
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">ArtiQuity</a>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Courses</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+            <div class="nav-auth">
+                <a href="#" class="login-btn">Login</a>
+                <a href="#" class="signup-btn">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Empower Your Artistic Journey</h1>
+        <p>Learn, create, and grow with ArtiQuity.</p>
+        <a href="#" class="cta">Explore Courses</a>
+        <a href="#" class="cta secondary">Become an Instructor</a>
+    </section>
+
+    <!-- Key Features Section -->
+    <section class="features">
+        <div class="feature">
+            <h2>Create & Share</h2>
+            <p>Artists can easily create and share their knowledge with the world.</p>
+        </div>
+        <div class="feature">
+            <h2>Learn at Your Pace</h2>
+            <p>Students can access content anytime, anywhere, and learn at their own pace.</p>
+        </div>
+        <div class="feature">
+            <h2>Monetize Your Skills</h2>
+            <p>Turn your creativity into an income stream with ArtiQuity.</p>
+        </div>
+        <div class="feature">
+            <h2>AI-Powered Learning</h2>
+            <p>Personalized recommendations based on your learning journey.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    </footer>
+</body>
 </html>
