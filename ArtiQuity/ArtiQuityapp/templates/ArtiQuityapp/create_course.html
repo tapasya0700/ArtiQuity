@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Course</title>
+    <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
+</head>
+<body>
+<div class="container">
+    <h2>Create a New Course</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Course</button>
+    </form>
+    <a href="{% url 'instructor_dashboard' %}" class="back-link">← Back to Dashboard</a>
+</div>
+</body>
+</html>

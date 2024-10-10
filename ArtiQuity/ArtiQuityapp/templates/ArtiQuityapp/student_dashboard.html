@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Dashboard</title>
+    <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
+</head>
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">ArtiQuity</a>
+            <ul class="nav-links">
+                <li><a href=" ">Home</a></li>
+                <li><a href="#">Courses</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+            <div class="nav-auth">
+                <a href="#" class="login-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Instructor Dashboard Content -->
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Welcome to the Student Dashboard, {{ request.user.username }}!</h1>
+           
+        </header>
+
+        <hr class="divider">
+
+        <!-- Courses Section -->
+        <section class="courses-section">
+            <h2>Explore art Courses</h2>
+            <div class="courses-container">
+                {% for course in courses %}
+                <div class="course-card">
+                    <div class="card-thumbnail">
+                        {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail.url }}" alt="{{ course.title }} Thumbnail">
+                        {% else %}
+                            <img src="{% static 'ArtiQuityapp/default_thumbnail.jpg' %}" alt="Default Thumbnail">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h3>{{ course.title }}</h3>
+                        <p class="course-status">{{ course.status }}</p>
+                        <div class="card-buttons">
+                            <a href="" class="btn add-lesson-btn">Add To cart</a>
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    </footer>
+
+</body>
+</html>

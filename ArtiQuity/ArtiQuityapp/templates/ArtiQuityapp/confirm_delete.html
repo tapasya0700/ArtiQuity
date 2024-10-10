@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Course</title>
+    <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Are you sure you want to delete the course: "{{ course.title }}"?</h2>
+        <p>This action cannot be undone.</p>
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn delete-btn">Yes, Delete</button>
+            <a href="{% url 'instructor_dashboard' %}" class="btn cancel-btn">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
