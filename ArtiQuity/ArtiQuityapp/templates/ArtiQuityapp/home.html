@@ -18,16 +18,28 @@
         <div class="container">
             <a href="#" class="logo">ArtiQuity</a>
             <ul class="nav-links">
-                <li><a href="#">Home</a></li>
+                <li><a href=" ">Home</a></li>
                 <li><a href="#">Courses</a></li>
                 <li><a href="#">About</a></li>
                 <li><a href="#">Contact</a></li>
             </ul>
             <div class="nav-auth">
-                <a href="#" class="login-btn">Login</a>
-                <a href="#" class="signup-btn">Sign Up</a>
-            </div>
+                
+                <div class="signup-dropdown">
+                    <button class="signup-btn">Login</button>
+                    <div class="dropdown-content">
+                        <a href="{% url 'user_login'%}">As a Student</a>
+                        <a href="{% url 'instructor_login' %}">As an Instructor</a>
+                    </div>  
+            <div class="signup-dropdown">
+        <button class="signup-btn">Sign Up</button>
+        <div class="dropdown-content">
+            <a href="{% url 'user_signup' %}">As a Student</a>
+            <a href="{% url 'instructor_signup' %}">As an Instructor</a>
         </div>
+    </div>
+            
+        
     </nav>
 
     <!-- Hero Section -->

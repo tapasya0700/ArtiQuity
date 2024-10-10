@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Course</title>
+    <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Course: {{ course.title }}</h2>
+        <form method="POST" enctype="multipart/form-data" class="edit-course-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn submit-btn">Save Changes</button>
+            <a href="{% url 'instructor_dashboard' %}" class="btn cancel-btn">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
