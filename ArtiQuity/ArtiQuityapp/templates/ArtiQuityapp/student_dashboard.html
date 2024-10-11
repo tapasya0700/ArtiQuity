@@ -56,6 +56,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {% for course in courses %}
+                {% if course.status == 'approved' %}
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
                     <!-- Course Thumbnail -->
                     <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
@@ -67,10 +68,13 @@
                         
                         <!-- Add to Cart Button -->
                         <div class="flex justify-center">
+                            <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
+&nbsp;
                             <a href="#" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">Add to Cart</a>
                         </div>
                     </div>
                 </div>
+                {%endif%}
                 {% endfor %}
             </div>
         </section>
