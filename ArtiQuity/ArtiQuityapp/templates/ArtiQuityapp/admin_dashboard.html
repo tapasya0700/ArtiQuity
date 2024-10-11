@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navbar Section -->
+    <nav class="bg-[#77390c] shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-white">ArtiQuity Admin</a>
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Dashboard</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Courses</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Users</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Settings</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'user_logout' %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="container mx-auto my-8 p-4">
+        <!-- Dashboard Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-[#2c3e50] mb-4">Welcome to the Admin Dashboard, {{ request.user.username }}!</h1>
+            <p class="text-lg text-gray-600">Manage your platform's content, users, and settings efficiently.</p>
+        </header>
+        <!-- Metrics Section -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Users Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-bold text-[#2c3e50]">{{user_count}}</h3>
+                <p class="text-gray-600">Total Users</p>
+            </div>
+            <!-- Courses Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-bold text-[#2c3e50]">{{active_courses}}</h3>
+                <p class="text-gray-600">Active Courses</p>
+            </div>
+            <!-- Earnings Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-bold text-[#2c3e50]">$15,780</h3>
+                <p class="text-gray-600">Total Earnings</p>
+            </div>
+            <!-- Enrollments Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-bold text-[#2c3e50]">320</h3>
+                <p class="text-gray-600">New Enrollments</p>
+            </div>
+        </section>
+        <section class="bg-white p-8 rounded-lg shadow-md mb-10">
+            <h2 class="text-3xl font-bold text-[#2c3e50] mb-6">Courses Awaiting Approval</h2>
+            <table class="w-full text-left">
+                <thead>
+                    <tr>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Course Title</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Instructor</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Price</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Status</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                        {% if course.status == 'pending' %}
+                        <tr class="hover:bg-gray-100">
+                            <td class="border-b p-4 text-sm">{{ course.title }}</td>
+                            <td class="border-b p-4 text-sm">{{ course.instructor.username }}</td>
+                            <td class="border-b p-4 text-sm">${{ course.price }}</td>
+                            <td class="border-b p-4 text-sm capitalize">{{ course.status }}</td>
+                            <td class="border-b p-4 text-sm">
+                                <!-- Approve Button -->
+                                <a href="{% url 'approve_course' course.id %}" class="text-green-500 hover:text-green-700">Approve</a> | 
+                                
+                                <!-- Reject Button with a prompt to enter rejection reason -->
+                                <a href="{% url 'reject_course' course.id %}" class="text-red-500 hover:text-red-700">Reject</a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Users Overview Section -->
+        <section class="bg-white p-8 rounded-lg shadow-md mb-10">
+            <h2 class="text-3xl font-bold text-[#2c3e50] mb-6">Users Overview</h2>
+            <table class="w-full text-left">
+                <thead>
+                    <tr>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Username</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Email</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Role</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Date Joined</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-100">
+                        <td class="border-b p-4 text-sm">{{ user.username }}</td>
+                        <td class="border-b p-4 text-sm">{{ user.email }}</td>
+                        <td class="border-b p-4 text-sm capitalize">{{ user.role }}</td>
+                        <td class="border-b p-4 text-sm">{{ user.date_joined }}</td>
+                        <td class="border-b p-4 text-sm">
+                            <a href="#" class="text-blue-500 hover:text-blue-700">Edit</a> | 
+                            <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        <!-- Courses Awaiting Approval Section -->
+       
+        <!-- Courses Overview Section -->
+        <section class="bg-white p-8 rounded-lg shadow-md mb-10">
+            <h2 class="text-3xl font-bold text-[#2c3e50] mb-6"> Courses Overview</h2>
+            <table class="w-full text-left">
+                <thead>
+                    <tr>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Course Title</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Instructor</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Price</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Status</th>
+                        <th class="border-b-2 p-4 text-sm text-[#2c3e50]">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                    {% if course.status == 'rejected' or course.status == 'approved'  %}
+
+                    <tr class="hover:bg-gray-100">
+                        <td class="border-b p-4 text-sm">{{ course.title }}</td>
+                        <td class="border-b p-4 text-sm">{{ course.instructor.username }}</td>
+                        <td class="border-b p-4 text-sm">${{ course.price }}</td>
+                        <td class="border-b p-4 text-sm capitalize">{{ course.status }}</td>
+                        <td class="border-b p-4 text-sm">
+                            <a href="#" class="text-blue-500 hover:text-blue-700">Edit</a> | 
+                            <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                        </td>
+                    </tr>
+                    {% endif%}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-[#77390c] shadow-md">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Privacy Policy</a> | 
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
+        </div>
+    </footer>
+</body>
+</html>

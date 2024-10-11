@@ -36,14 +36,36 @@ class Course(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     thumbnail = models.ImageField(upload_to='course_thumbnails/', blank=True, null=True)
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses')
-    status = models.CharField(max_length=50, choices=[('draft', 'Draft'), ('pending', 'Pending Approval'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='draft')
+    
+    # Status dropdown choices
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='draft')
     rejection_reason = models.TextField(blank=True, null=True)
     is_published = models.BooleanField(default=False)
+    
+    # New field for tracking if the course has been sent for admin approval
+    is_sent_for_approval = models.BooleanField(default=False)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self):
         return self.title
+
+    def send_for_approval(self):
+        """
+        Method to update the course status and mark it as sent for admin approval.
+        """
+        self.is_sent_for_approval = True
+        self.status = 'pending'
+        self.save()
+
 
 
 # 3. Lessons Table

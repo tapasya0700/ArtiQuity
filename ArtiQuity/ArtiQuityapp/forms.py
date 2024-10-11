@@ -21,6 +21,14 @@ class UserLoginForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}), max_length=255, required=True)
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password'}), required=True)
 
+
+
+class AdminLoginForm(forms.Form):
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}), max_length=255, required=True)
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password'}), required=True)
+
+
+
 class InstructorSignupForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, label="Password")
 

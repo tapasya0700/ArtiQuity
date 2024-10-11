@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .models import User,Course,Lesson
-from .forms import UserSignupForm,UserLoginForm,InstructorLoginForm,InstructorSignupForm,CourseCreationForm,LessonCreationForm
+from .forms import UserSignupForm,UserLoginForm,InstructorLoginForm,InstructorSignupForm,CourseCreationForm,LessonCreationForm,AdminLoginForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout
 import os
+from .models import User
 
 # Create your views here.
 def home(request):
@@ -52,6 +53,7 @@ def instructor_dashboard(request):
         courses = courses.filter(title__icontains=search_query)
 
     return render(request, 'ArtiQuityapp/instructor_dashboard.html', {'courses': courses})
+
 @login_required
 def student_dashboard(request):
 
@@ -162,12 +164,69 @@ def user_login(request):
                 print(f"Session Data: {request.session.items()}")
                 update_session_auth_hash(request, user)
                 print(f"Session Data: {request.session.items()}")
+                
                 return redirect('student_dashboard')
                 
     else:
         form = UserLoginForm()
 
     return render(request, 'ArtiQuityapp/login.html', {'form': form})
+
+
+
+def admin_login(request):
+    if request.method == 'POST':
+        form = AdminLoginForm(request.POST)
+        if form.is_valid():
+            username = request.POST['username']
+            password = request.POST['password']
+
+            try:
+                user_obj = User.objects.get(username=username)
+            except User.DoesNotExist:
+                messages.error(request, "Admin does not exist.")
+                return redirect('admin_login')
+            
+            user = custom_authenticate(username, password)
+            if user and user.role == 'admin':
+                # Set session data for the admin
+                request.session['user_id'] = user.id
+                request.session['user_role'] = user.role
+                request.session['username'] = user.username
+
+                return redirect('admin_dashboard')
+            else:
+                messages.error(request, "Invalid admin credentials.")
+        else:
+            messages.error(request, "Invalid form input.")
+    else:
+        form = AdminLoginForm()
+
+    return render(request, 'ArtiQuityapp/admin_login.html', {'form': form})
+
+
+def admin_dashboard(request):
+    # Check if the logged-in user has the role of 'admin'
+    if request.session.get('user_role') != 'admin':
+        messages.error(request, "Access denied! Only admins can access this page.")
+        return redirect('home')
+
+    # If the user is an admin, render the custom admin dashboard
+    users=User.objects.all()
+    user_count=users.count()
+    courses = Course.objects.all()
+    active_courses=Course.objects.filter(status='approved').count()
+    search_query = request.GET.get('search', '')
+    if search_query:
+        courses = courses.filter(title__icontains=search_query)
+    print(courses)
+
+
+    return render(request, 'ArtiQuityapp/admin_dashboard.html', {'courses': courses,'users':users,'user_count':user_count,'active_courses':active_courses})
+
+
+
+
 
 def instructor_signup(request):
     if request.method == 'POST':
@@ -301,6 +360,69 @@ def user_logout(request):
     print("User is logged out")
     return redirect('home')
 
+@login_required
+def send_course_for_approval(request, course_id):
+    """
+    View for instructors to send a course for admin approval.
+    """
+    course = get_object_or_404(Course, id=course_id, instructor=request.user)
+
+    if course.status == 'draft' or course.status=='rejected':
+        course.send_for_approval()
+        messages.success(request, f'Course "{course.title}" has been sent for admin approval.')
+    else:
+        messages.error(request, 'Only draft courses can be sent for approval.')
+
+    return redirect('instructor_dashboard')
+
+@login_required
+def approve_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Ensure only admin can approve courses
+    if request.user.role == 'admin':
+        course.status = 'approved' 
+         # Change course status to 'approved'
+        course.save()
+        messages.success(request, f'Course "{course.title}" has been approved successfully.')
+    else:
+        messages.error(request, 'You do not have permission to perform this action.')
+    
+    return redirect('admin_dashboard')
+
+# View to reject a course
+@login_required
+def reject_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Ensure only admin can reject courses
+    if request.user.role == 'admin':
+        if request.method == 'POST':
+            rejection_reason = request.POST.get('rejection_reason')  # Fetch rejection reason from form
+            course.status = 'rejected'  # Change course status to 'rejected'
+            course.rejection_reason = rejection_reason  # Save the rejection reason
+            course.save()
+            messages.success(request, f'Course "{course.title}" has been rejected.')
+            return redirect('admin_dashboard')
+        
+        # Render a template to ask for rejection reason
+        return render(request, 'ArtiQuityapp/reject_course.html', {'course': course})
+    else:
+        messages.error(request, 'You do not have permission to perform this action.')
+    
+    return redirect('admin_dashboard')
+
+def course_detail_view(request, course_id):
+    role=request.user.role
+    print(role)
+    course = get_object_or_404(Course, id=course_id)
+    lessons = course.lessons.all()  # Retrieve all lessons for the course
+    context = {
+        'course': course,
+        'lessons': lessons,
+        'role':role
+    }
+    return render(request, 'ArtiQuityapp/course_detail.html', context)
 
 
 

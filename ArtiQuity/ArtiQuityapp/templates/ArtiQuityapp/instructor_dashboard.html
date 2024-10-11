@@ -65,19 +65,95 @@
                     <div class="p-4">
                         <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
                         <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
+                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
                         
                         <!-- Card Buttons -->
                         <div class="flex justify-between items-center">
                             <a href="{% url 'create_lesson' course.id %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Add Lesson</a>
+                            <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
                             <a href="{% url 'edit_course' course.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Edit</a>
                             <a href="{% url 'delete_course' course.id %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Delete</a>
+                            {% if course.status == 'draft' and not course.is_sent_for_approval %}
+                            <a href="{% url 'send_course_for_approval' course.id %}" class="btn send-approval-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition duration-300">
+                                Send for Approval
+                            </a>
+                        {% endif %}
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </section>
+   <!-- Courses Section -->
+   <section class="courses-section">
+    <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Rejected Courses</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for course in courses %}
+        {% if course.status == 'rejected' %}
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+            <!-- Course Thumbnail -->
+            <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+            
+            <!-- Course Info -->
+            <div class="p-4">
+                <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
+                <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
+                <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
+                <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.rejection_reason }}</p>
+                
+                <!-- Card Buttons -->
+                <div class="flex justify-between items-center">
+                    <a href="{% url 'create_lesson' course.id %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Add Lesson</a>
+                    <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
+                    <a href="{% url 'edit_course' course.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Edit</a>
+                    <a href="{% url 'delete_course' course.id %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Delete</a>
+                    {% if course.status == 'rejected'  %}
+                    <a href="{% url 'send_course_for_approval' course.id %}" class="btn send-approval-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition duration-300">
+                       Re Send for Approval
+                    </a>
+                {% endif %}
+
+                </div>
+            </div>
+        </div>
+        {% endif%}
+        {% endfor %}
     </div>
+</section>
+<section class="courses-section">
+    <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Approved Courses</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for course in courses %}
+        {% if course.status == 'approved' %}
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+            <!-- Course Thumbnail -->
+            <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+            
+            <!-- Course Info -->
+            <div class="p-4">
+                <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
+                <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
+                <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
+                
+                
+                <!-- Card Buttons -->
+                <div class="flex justify-between items-center">
+                    <a href="{% url 'create_lesson' course.id %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Add Lesson</a>
+                    <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
+                    <a href="{% url 'edit_course' course.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Edit</a>
+                    <a href="{% url 'delete_course' course.id %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Delete</a>
+
+
+                </div>
+            </div>
+        </div>
+        {% endif%}
+        {% endfor %}
+    </div>
+</section>
+
+    
+
 
     <!-- Footer Section -->
     <footer class="bg-[#77390c] shadow-md">

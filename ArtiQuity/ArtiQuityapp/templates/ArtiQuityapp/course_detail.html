@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.title }} - Course Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar Section -->
+    <nav class="bg-[#77390c] shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <!-- Logo Section -->
+            <a href="#" class="text-2xl font-bold text-white">ArtiQuity</a>
+
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Home</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Courses</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">About</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Contact</a>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'user_logout' %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Course Details Section -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="bg-white shadow-md rounded-lg p-8">
+            <h1 class="text-4xl font-bold text-[#2c3e50] mb-4">{{ course.title }}</h1>
+            <p class="text-lg text-gray-600 mb-6">{{ course.description }}</p>
+            
+            <h2 class="text-3xl font-semibold text-[#2c3e50] mb-4">Course Lessons</h2>
+            {% if lessons %}
+                <ul class="list-disc list-inside space-y-4">
+                    {% for lesson in lessons %}
+                        <li>
+                            <h3 class="text-xl font-medium text-gray-800">{{ lesson.title }}</h3>
+                            <p class="text-gray-600">{{ lesson.content }}</p>
+                            {% if lesson.video_url %}
+                                <a href="{{ lesson.video_url }}" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-red-500">No lessons available for this course yet.</p>
+            {% endif %}
+            {% if role == 'instructor'%}
+            <div class="mt-10 text-center">
+                <a href="{% url 'instructor_dashboard' %}" class="text-[#40dae2] font-medium hover:text-[#023047] hover:underline transition duration-300">← Back to Dashboard</a>
+            </div>
+            {%endif%}
+            {% if role == 'student'%}
+            <div class="mt-10 text-center">
+                <a href="{% url 'student_dashboard' %}" class="text-[#40dae2] font-medium hover:text-[#023047] hover:underline transition duration-300">← Back to Dashboard</a>
+            </div>
+            {%endif%}
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-[#77390c] shadow-md py-6 mt-10">
+        <div class="container mx-auto text-center">
+            <p class="text-white">&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Privacy Policy</a> | 
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
+        </div>
+    </footer>
+</body>
+</html>
