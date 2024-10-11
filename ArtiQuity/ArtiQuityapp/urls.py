@@ -17,5 +17,6 @@ urlpatterns = [
     path('instructor/edit-lesson/<int:lesson_id>/', views.edit_lesson, name='edit_lesson'),
     path('instructor/delete-lesson/<int:lesson_id>/', views.delete_lesson, name='delete_lesson'),
      path('student/dashboard/', views.student_dashboard, name='student_dashboard'),
+     path('logout/', views.user_logout, name='user_logout'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
