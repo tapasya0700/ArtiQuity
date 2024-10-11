@@ -4,63 +4,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Signup</title>
-    <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
+    <title>Instructor Signup</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="#" class="logo">ArtiQuity</a>
-            <ul class="nav-links">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Courses</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-            <div class="nav-auth">
-                <a href="#" class="login-btn">Login</a>
-                <a href="{% url 'user_login' %}" class="signup-btn">Sign Up</a>
+<body class="bg-gray-50">
+    <!-- Navbar Section -->
+       <!-- Navbar Section -->
+    <nav class="bg-[#77390c] shadow-md"> <!-- Set Dark Brown Background Color -->
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <!-- Logo Section -->
+            <a href="#" class="text-2xl font-bold text-white">ArtiQuity</a>
+            
+            <!-- Navigation Links for Larger Screens -->
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Home</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Courses</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">About</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Contact</a>
+            </div>
+
+            <!-- Right Side: Search Bar, Login, Signup Buttons -->
+            <div class="flex items-center space-x-4">
+                <!-- Search Bar -->
+              
                 
-            </div>s
+                <!-- Login Dropdown Button -->
+                <div class="relative group">
+                    <button class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-300">
+                        Login
+                    </button>
+                    <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex">
+                        <a href="{% url 'user_login' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As a Student</a>
+                        <a href="{% url 'instructor_login' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As an Instructor</a>
+                    </div>
+                </div>
+
+                <!-- Signup Dropdown Button -->
+                <div class="relative group">
+                    <button class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-300">
+                        Sign Up
+                    </button>
+                    <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex">
+                        <a href="{% url 'user_signup' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As a Student</a>
+                        <a href="{% url 'instructor_signup' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As an Instructor</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
-    <div class="signup-container">
-        <!-- Left Section with Illustration -->
-        <div class="illustration">
-            <img src="{% static 'ArtiQuityapp/signup-illustration.png' %}" alt="Illustration" class="illustration-img">
-        </div>
-
-        <!-- Right Section with Signup Form -->
-        <div class="signup-form-container">
-            <div class=".signup-box">
-            <h2 class="form-title">Login and Start Teaching</h2>
-            <form method="POST" enctype="multipart/form-data" class="signup-form">
+    
+ 
+    <!-- Login Container -->
+    <div class="flex justify-center items-center min-h-screen ">
+        <div class="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full">
+            <!-- Form Title -->
+            <h2 class="text-2xl font-bold text-center text-gray-700 mb-6">Login to Your Account</h2>
+            
+            <!-- Login Form -->
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="signup-btn">Sign Up</button>
+                <button type="submit" class="w-full bg-[#40dae2] text-white py-2 rounded-md hover:bg-[#17303a] transition duration-300">Login</button>
             </form>
 
             <!-- Divider with 'OR' Text -->
-            <div class="form-divider">
-                <span>OR</span>
+            <div class="flex items-center justify-center my-6">
+                <span class="border-b w-1/5 lg:w-1/4"></span>
+                <span class="text-xs text-gray-500 uppercase mx-2">OR</span>
+                <span class="border-b w-1/5 lg:w-1/4"></span>
             </div>
 
-            <!-- Google Signup Button -->
-            <button class="google-btn">
-                <i class="fab fa-google"></i> Sign Up with Google
+            <!-- Google Login Button -->
+            <button class="w-full bg-red-600 text-white py-2 rounded-md flex items-center justify-center space-x-2 hover:bg-red-700 transition duration-300">
+                <i class="fab fa-google"></i>
+                <span>Login with Google</span>
             </button>
 
-            <!-- Already have an account -->
-            <div class="login-redirect">
-                Dont have an account? <a href="{% url 'instructor_signup' %}">Sign Up</a>
+            <!-- Signup Redirect Link -->
+            <div class="mt-4 text-center">
+                <p class="text-gray-600">Don't have an account? 
+                    <a href="{% url 'instructor_signup' %}" class="text-[#40dae2] hover:text-[#17303a] transition duration-300">Sign Up</a>
+                </p>
             </div>
         </div>
     </div>
-    </div>
-    <footer>
-        <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
-        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    <!-- Footer Section -->
+    <footer class="bg-[#77390c] shadow-md">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Privacy Policy</a> | 
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
+        </div>
     </footer>
 </body>
 </html>

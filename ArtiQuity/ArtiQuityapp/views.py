@@ -4,16 +4,22 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .models import User,Course,Lesson
 from .forms import UserSignupForm,UserLoginForm,InstructorLoginForm,InstructorSignupForm,CourseCreationForm,LessonCreationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth import update_session_auth_hash
-
+from django.contrib.auth import logout
+import os
 
 # Create your views here.
 def home(request):
+    if(request.user):
+        print("User:")
+        print(request.user)
+    else:
+        print("User is not logged in")
     return render(request,'ArtiQuityapp/home.html')
 def about(request):
     return HttpResponse("Welcome to ArtiQuity")
@@ -41,6 +47,9 @@ def instructor_dashboard(request):
 
     # Get courses created by the instructor
     courses = Course.objects.filter(instructor=request.user)
+    search_query = request.GET.get('search', '')
+    if search_query:
+        courses = courses.filter(title__icontains=search_query)
 
     return render(request, 'ArtiQuityapp/instructor_dashboard.html', {'courses': courses})
 @login_required
@@ -55,6 +64,9 @@ def student_dashboard(request):
     # Get courses created by the instructor
     print("hello")
     courses = Course.objects.all()
+    search_query = request.GET.get('search', '')
+    if search_query:
+        courses = courses.filter(title__icontains=search_query)
     print(courses)
 
 
@@ -219,8 +231,16 @@ from django.shortcuts import get_object_or_404
 @login_required
 def edit_course(request, course_id):
     course = get_object_or_404(Course, id=course_id, instructor=request.user)
+    old_image_path = course.thumbnail.path if course.thumbnail else None
     if request.method == 'POST':
         form = CourseCreationForm(request.POST, request.FILES, instance=course)
+
+        if 'thumbnail' in request.FILES and old_image_path:
+            if os.path.isfile(old_image_path):
+                os.remove(old_image_path)
+                print("INFO | Old Image deleted")
+
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Course updated successfully!')
@@ -235,7 +255,12 @@ def edit_course(request, course_id):
 @login_required
 def delete_course(request, course_id):
     course = get_object_or_404(Course, id=course_id, instructor=request.user)
+    old_image_path = course.thumbnail.path if course.thumbnail else None
+   
     if request.method == 'POST':
+        if 'thumbnail' in request.FILES and old_image_path:
+                if os.path.isfile(old_image_path):
+                    os.remove(old_image_path)  # Remove the old image file
         course.delete()
         messages.success(request, 'Course deleted successfully!')
         return redirect('instructor_dashboard')
@@ -269,6 +294,12 @@ def delete_lesson(request, lesson_id):
         return redirect('instructor_dashboard')
     
     return render(request, 'ArtiQuityapp/confirm_delete.html', {'lesson': lesson})
+
+def user_logout(request):
+    logout(request)
+    request.session.flush()
+    print("User is logged out")
+    return redirect('home')
 
 
 

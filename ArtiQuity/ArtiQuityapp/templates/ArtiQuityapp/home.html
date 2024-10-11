@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,75 +5,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArtiQuity - Empower Your Artistic Journey</title>
-    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .dropdown-content {
+            display: none;
+        }
 
-    <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
-    
+        .group:hover .dropdown-content {
+            display: block;
+        }
+    </style>
 </head>
+<body class="bg-gray-50">
 
+    <!-- Navbar Section -->
+    {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtiQuity - Empower Your Artistic Journey</title>
+    <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
+    <!-- Import Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
 <body>
     <!-- Navbar Section -->
-    <nav class="navbar">
-        <div class="container">
-            <a href="#" class="logo">ArtiQuity</a>
-            <ul class="nav-links">
-                <li><a href=" ">Home</a></li>
-                <li><a href="#">Courses</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-            <div class="nav-auth">
-                
-                <div class="signup-dropdown">
-                    <button class="signup-btn">Login</button>
-                    <div class="dropdown-content">
-                        <a href="{% url 'user_login'%}">As a Student</a>
-                        <a href="{% url 'instructor_login' %}">As an Instructor</a>
-                    </div>  
-            <div class="signup-dropdown">
-        <button class="signup-btn">Sign Up</button>
-        <div class="dropdown-content">
-            <a href="{% url 'user_signup' %}">As a Student</a>
-            <a href="{% url 'instructor_signup' %}">As an Instructor</a>
-        </div>
-    </div>
+    <nav class="bg-[#77390c] shadow-md"> <!-- Set Dark Brown Background Color -->
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <!-- Logo Section -->
+            <a href="#" class="text-2xl font-bold text-white">ArtiQuity</a>
             
-        
+            <!-- Navigation Links for Larger Screens -->
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Home</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Courses</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">About</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Contact</a>
+            </div>
+
+            <!-- Right Side: Search Bar, Login, Signup Buttons -->
+            <div class="flex items-center space-x-4">
+                <!-- Search Bar -->
+                <input type="text" placeholder="Search Courses..." class="border border-gray-300 p-2 rounded-md focus:outline-none focus:border-blue-400">
+                
+                <!-- Login Dropdown Button -->
+                <div class="relative group">
+                    <button class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-300">
+                        Login
+                    </button>
+                    <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex">
+                        <a href="{% url 'user_login' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As a Student</a>
+                        <a href="{% url 'instructor_login' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As an Instructor</a>
+                    </div>
+                </div>
+
+                <!-- Signup Dropdown Button -->
+                <div class="relative group">
+                    <button class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-300">
+                        Sign Up
+                    </button>
+                    <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex">
+                        <a href="{% url 'user_signup' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As a Student</a>
+                        <a href="{% url 'instructor_signup' %}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">As an Instructor</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
 
+ 
+
+
     <!-- Hero Section -->
-    <section class="hero">
-        <h1>Empower Your Artistic Journey</h1>
-        <p>Learn, create, and grow with ArtiQuity.</p>
-        <a href="#" class="cta">Explore Courses</a>
-        <a href="#" class="cta secondary">Become an Instructor</a>
+    <section class="bg-cover bg-center h-96 text-white" style="background-image: url('https://images.unsplash.com/photo-1527689368864-3a821dbccc34');">
+        <div class="flex items-center justify-center h-full bg-gradient-to-r from-gray-900 to-transparent bg-opacity-70">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-4">Empower Your Artistic Journey</h1>
+                <p class="text-xl mb-8">Learn, create, and grow with ArtiQuity. Your destination for all things artistic and educational.</p>
+                <a href="#" class="bg-yellow-500 px-6 py-3 text-lg rounded-md hover:bg-yellow-600 transition duration-300">Explore Courses</a>
+                <a href="#" class="bg-blue-500 px-6 py-3 text-lg rounded-md ml-4 hover:bg-blue-600 transition duration-300">Become an Instructor</a>
+            </div>
+        </div>
     </section>
 
-    <!-- Key Features Section -->
-    <section class="features">
-        <div class="feature">
-            <h2>Create & Share</h2>
-            <p>Artists can easily create and share their knowledge with the world.</p>
-        </div>
-        <div class="feature">
-            <h2>Learn at Your Pace</h2>
-            <p>Students can access content anytime, anywhere, and learn at their own pace.</p>
-        </div>
-        <div class="feature">
-            <h2>Monetize Your Skills</h2>
-            <p>Turn your creativity into an income stream with ArtiQuity.</p>
-        </div>
-        <div class="feature">
-            <h2>AI-Powered Learning</h2>
-            <p>Personalized recommendations based on your learning journey.</p>
+    <!-- Top Categories Section -->
+    <section class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold text-center mb-8">Top Categories</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Category Card Template -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+                <div class="h-32 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1517048676732-d65bc937f952');"></div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Painting</h3>
+                    <p class="text-gray-700">Explore a wide variety of painting techniques and styles to master your brush strokes.</p>
+                </div>
+            </div>
+            <!-- Additional Category Cards -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+                <div class="h-32 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1520809362170-b6a8e07bfe18');"></div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Digital Art</h3>
+                    <p class="text-gray-700">Learn to create stunning digital art using industry-standard software and tools.</p>
+                </div>
+            </div>
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+                <div class="h-32 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1519643381401-22c77e60520e');"></div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Photography</h3>
+                    <p class="text-gray-700">Master the art of capturing beautiful moments through your lens.</p>
+                </div>
+            </div>
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+                <div class="h-32 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1504803547263-a0ec12913974');"></div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Sculpture</h3>
+                    <p class="text-gray-700">Learn the techniques and principles of sculpting in various mediums.</p>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer>
-        <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
-        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    <footer class="bg-[#77390c] shadow-md">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Privacy Policy</a> | 
+            <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
+        </div>
     </footer>
 </body>
 </html>
-
