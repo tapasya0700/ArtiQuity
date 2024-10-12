@@ -156,5 +156,19 @@ AUTHENTICATION_BACKENDS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'artiquity700@gmail.com'  # Use your email
+EMAIL_HOST_PASSWORD = 'xnyp ykdr rsym qdjs'  # Use app-specific password
+
+#gmail App Password
+#Password: xnyp ykdr rsym qdjs
+
+
+
 
 

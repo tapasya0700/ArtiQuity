@@ -43,9 +43,20 @@
                         <li>
                             <h3 class="text-xl font-medium text-gray-800">{{ lesson.title }}</h3>
                             <p class="text-gray-600">{{ lesson.content }}</p>
+                            {% if role == 'instructor'%}
                             {% if lesson.video_url %}
                                 <a href="{{ lesson.video_url }}" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
                             {% endif %}
+                           
+                            {%endif%}
+                            {% if role == 'student'%}
+                            {% if lesson.video_url %}
+                                <a href="#" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
+                            {% endif %}
+                           
+                            {%endif%}
+
+                            
                         </li>
                     {% endfor %}
                 </ul>

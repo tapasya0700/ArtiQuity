@@ -58,3 +58,21 @@ class LessonCreationForm(forms.ModelForm):
     class Meta:
         model = Lesson
         fields = ['title', 'video_url', 'content']
+
+
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Enter your email'}), required=True)
+
+class SetNewPasswordForm(forms.Form):
+    new_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter new password'}), required=True)
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm new password'}), required=True)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if new_password and confirm_password and new_password != confirm_password:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned_data

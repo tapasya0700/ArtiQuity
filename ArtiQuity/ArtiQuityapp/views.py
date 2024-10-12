@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .models import User,Course,Lesson
-from .forms import UserSignupForm,UserLoginForm,InstructorLoginForm,InstructorSignupForm,CourseCreationForm,LessonCreationForm,AdminLoginForm
+from .forms import UserSignupForm,UserLoginForm,InstructorLoginForm,InstructorSignupForm,CourseCreationForm,LessonCreationForm,AdminLoginForm,ForgotPasswordForm,SetNewPasswordForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
@@ -13,6 +13,9 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout
 import os
 from .models import User
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+from django.urls import reverse
 
 # Create your views here.
 def home(request):
@@ -424,5 +427,68 @@ def course_detail_view(request, course_id):
     }
     return render(request, 'ArtiQuityapp/course_detail.html', context)
 
+def forgot_password(request):
+    if request.method == 'POST':
+        form = ForgotPasswordForm(request.POST, request.FILES)
+        if form.is_valid():
+                  
+            email=request.POST['email']
+           
+            print(email)
 
+            try:
+                user_obj = User.objects.get(email=email)
+                print(user_obj.last_name)
+                token = generate_token()
+                user_obj.reset_password_token = token  # Save the token in the user table
+                user_obj.save()
+                if user_obj is not None:
+                 # Save the token in the user table
+                    reset_link = request.build_absolute_uri(reverse('reset_password') + f"?token={token}")
+                    send_mail(
+                        'Reset Your Password',
+                        f'Click the link to reset your password: {reset_link}',
+                        'tapasyasangrai700@gmail.com',  # Change to your email
+                        [email],
+                        fail_silently=False,
+                        )
+                    messages.success(request, 'A password reset link has been sent to your email.')
+                    return redirect('forgot_password')
+            except User.DoesNotExist:
+                messages.error(request, 'No account found with this email address.')
+                return redirect('forgot_password')
+                
+    else:
+        form = ForgotPasswordForm()
 
+    return render(request, 'ArtiQuityapp/forgot_password.html', {'form': form})
+
+def generate_token():
+    return get_random_string(64)
+
+def reset_password(request):
+    token = request.GET.get('token')
+
+    if not token:
+        messages.error(request, 'Invalid or expired token.')
+        return redirect('forgot_password')
+
+    try:
+        user = User.objects.get(reset_password_token=token)
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid or expired token.')
+        return redirect('forgot_password')
+
+    if request.method == 'POST':
+        form = SetNewPasswordForm(request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password']
+            user.password_hash=(new_password)  # Update the user's password
+            user.reset_password_token = None  # Clear the token after reset
+            user.save()
+            messages.success(request, 'Your password has been reset successfully.')
+            return redirect('user_login')
+    else:
+        form = SetNewPasswordForm()
+
+    return render(request, 'ArtiQuityapp/reset_password.html', {'form': form})
