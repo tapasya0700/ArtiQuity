@@ -170,5 +170,10 @@ EMAIL_HOST_PASSWORD = 'xnyp ykdr rsym qdjs'  # Use app-specific password
 
 
 
+STRIPE_PUBLIC_KEY = 'pk_test_51Q8yQuCsSwr3GFEeCx8PThRXj5llP5YnjOsPYfoT8V0jDBT4ncw8DAoOgkYjKPhpIiBhGx5zOMnfC1guLq10pEwD00GVrKCwo1'
+STRIPE_SECRET_KEY = 'sk_test_51Q8yQuCsSwr3GFEeRbU3ibVmF9D9HfH6lq7hzpHBCFt12WVvfBLqZAWdv9xnE9S321QZPQJYlxGUylRQRk4Oh3bt00X5I67DBK'
+
+
+
 
 

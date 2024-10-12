@@ -97,12 +97,14 @@ class Enrollment(models.Model):
 # 5. Payments Table
 class Payment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='payments')
+    courses = models.ManyToManyField(Course, related_name='payments') 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=50, choices=[('Stripe', 'Stripe'), ('PayPal', 'PayPal')])
     transaction_id = models.CharField(max_length=255)
     payment_status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')])
     payment_date = models.DateTimeField(auto_now_add=True)
+
+
 
     def _str_(self):
         return f'{self.student.username} paid for {self.course.title}'
@@ -149,3 +151,14 @@ class Certificate(models.Model):
 
     def _str_(self):
         return f'Certificate for {self.enrollment.course.title} - {self.enrollment.student.username}'
+    
+# Cart Table 
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title}"
+    

@@ -49,7 +49,7 @@
 
         <!-- Courses Section -->
         <section class="py-8">
-            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Explore Art Courses</h2>
+            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Your Enrolled Courses</h2>
              <!-- Search Bar -->
              <div class="container mx-auto mb-6">
                 <form method="GET" action="" class="flex">
@@ -63,8 +63,8 @@
                 </form>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course in courses %}
-                {% if course.status == 'approved' %}
+                {% for course in en_course %}
+               
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
                     <!-- Course Thumbnail -->
                     <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
@@ -78,11 +78,11 @@
                         <div class="flex justify-center">
                             <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
 &nbsp;
-                            <a href="{% url 'add_to_cart' course.id%}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">Add to Cart</a>
+                            
                         </div>
                     </div>
                 </div>
-                {%endif%}
+              
                 {% endfor %}
             </div>
         </section>
