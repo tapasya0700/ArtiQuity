@@ -12,10 +12,13 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout
 import os
-from .models import User
+from .models import User,Cart,Payment,Enrollment
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.urls import reverse
+from django.conf import settings
+import stripe
+from ArtiQuityapp.models import Cart 
 
 # Create your views here.
 def home(request):
@@ -492,3 +495,177 @@ def reset_password(request):
         form = SetNewPasswordForm()
 
     return render(request, 'ArtiQuityapp/reset_password.html', {'form': form})
+
+
+# Add course to cart
+@login_required
+def add_to_cart(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    cart_item, created = Cart.objects.get_or_create(user=request.user, course=course)
+    
+    if created:
+        cart_item.save()
+        return redirect('student_dashboard')
+    else:
+        return redirect('view_cart')
+    
+@login_required
+def view_cart(request):
+    cart_items = Cart.objects.filter(user=request.user)
+    total_price = sum(item.course.price for item in cart_items)
+    
+    return render(request, 'ArtiQuityapp/cart.html', {'cart_items': cart_items, 'total_price': total_price})
+
+@login_required
+def remove_from_cart(request, course_id):
+    cart_item = get_object_or_404(Cart, user=request.user, course_id=course_id)
+    cart_item.delete()
+    return redirect('view_cart')
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+# Checkout View
+def checkout(request):
+    cart_items = Cart.objects.filter(user=request.user)
+    total_price = sum(item.course.price for item in cart_items)
+    print(cart_items)
+    print(total_price)
+    # Display the checkout page
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price,
+          'stripe_publishable_key': settings.STRIPE_PUBLIC_KEY
+    }
+    return render(request, 'ArtiQuityapp/checkout.html', context)
+
+
+ # Assuming Cart model is defined
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def process_payment(request):
+    login_required
+def process_payment(request):
+    if request.method == 'POST':
+        # Get payment details from form
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        stripe_token = request.POST.get('stripeToken')
+
+        # Validate form fields
+        if not full_name or not email or not stripe_token:
+            messages.error(request, "Missing required payment information.")
+            return redirect('checkout')
+        else:
+        # Calculate total price from cart
+            cart_items = Cart.objects.filter(user=request.user)
+            total_price = sum(item.course.price for item in cart_items)
+
+            if total_price <= 0:
+                messages.error(request, "Your cart is empty.")
+                return redirect('checkout')
+
+            else:
+                try:
+            # Create a Stripe charge
+                    charge = stripe.Charge.create(
+                            amount=int(total_price * 100),  # Stripe works with cents
+                        currency='usd',
+                        description=f"Charge for {request.user.username}",
+                        source=stripe_token,
+                        receipt_email=email,
+                    )
+
+            # If payment is successful, record payment and clear cart
+                    payment = Payment.objects.create(
+                            student=request.user,
+                              amount=total_price,
+                   
+                                transaction_id=charge.id,  # Assuming you store Stripe charge IDs
+                            )
+                    for items in cart_items:
+                            payment.courses.add(items.course)
+                    payment.save()
+                    if payment is not None:
+                        for items in cart_items:
+                              enrollment=Enrollment.objects.create(
+                                   student=request.user,
+                                   enrolled_at=timezone.now(),
+                                   course=items.course
+                              )
+                              enrollment.save()
+
+                              
+                         
+    
+
+
+            # Clear the user's cart after successful payment
+                    cart_items.delete()
+
+            # Redirect to a success page (student dashboard)
+                    messages.success(request, "Payment successful! Thank you for your purchase.")
+                    return redirect('student_dashboard')
+
+                except stripe.error.CardError as e:
+            # Handle card errors
+                        messages.error(request, f"Your card was declined: {e.user_message}")
+                        print('1')
+                        return redirect('checkout')
+                except stripe.error.RateLimitError:
+            # Too many requests made to the API too quickly
+                        messages.error(request, "Rate limit error. Please try again.")
+                        print('2')
+                        return redirect('checkout')
+                except stripe.error.InvalidRequestError:
+            # Invalid parameters were supplied to Stripe's API
+                        messages.error(request, "Invalid payment request. Please check your details.")
+                        print('3')
+                        return redirect('checkout')
+                except stripe.error.AuthenticationError:
+            # Authentication with Stripe's API failed (wrong API keys?)
+                        messages.error(request, "Payment authentication failed. Please contact support.")
+                        print('4')
+                        return redirect('checkout')
+                except stripe.error.APIConnectionError:
+            # Network communication with Stripe failed
+                        messages.error(request, "Network error. Please try again.")
+                        print('5')
+                        return redirect('checkout')
+                except stripe.error.StripeError:
+            # Generic Stripe error
+                        messages.error(request, "Payment error. Please try again later.")
+                        print('6')
+                        return redirect('checkout')
+                except Exception as e:
+            # Handle other unforeseen errors
+                        messages.error(request, f"An error occurred: {str(e)}")
+                        print(f"Other Error: {str(e)}")
+                        return redirect('checkout')
+
+    # If the request is GET, show the checkout page
+    return render(request, 'ArtiQuityapp/checkout.html')
+
+def enrolled_courses(request):
+    enrolls=Enrollment.objects.filter(student_id=request.user)
+    if enrolls:
+        en_course=[]
+        print(enrolls)
+        for e in enrolls:
+            en_course.append(Course.objects.filter(id=e.course_id).first())
+        print(en_course)
+        search_query = request.GET.get('search', '')
+        if search_query:
+            en_course_search=[]
+            for e in en_course:
+               search_course = Course.objects.filter(title__icontains=search_query,id=e.id)
+               print(search_course)
+               if search_course:
+                   en_course_search.append(search_course.first())
+            print(en_course_search)
+            
+            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course_search}) 
+        else:
+            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course})
+    else:
+        return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course})
