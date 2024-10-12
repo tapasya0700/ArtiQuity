@@ -1,15 +1,15 @@
 from django.db import models
-
+from .validations import *
 # Create your models here.
 
 
 # 1. Users Table
 class User(models.Model):
-    username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField(max_length=255)
+    username = models.CharField(max_length=255, unique=True,validators=[ValidateUserName])
+    email = models.EmailField(max_length=255,validators=[ValidateEmail])
     password_hash = models.CharField(max_length=255)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100,validators=[ValidateName])
+    last_name = models.CharField(max_length=100,validators=[ValidateName])
     profile_picture = models.CharField(max_length=255, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     role = models.CharField(max_length=50, choices=[('student', 'Student'), ('instructor', 'Instructor'), ('admin', 'Admin')])
@@ -17,6 +17,7 @@ class User(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_login = models.DateTimeField(blank=True, null=True)
     is_authenticated = models.BooleanField(default=False)
+    reset_password_token = models.CharField(max_length=100, blank=True, null=True)
 
     USERNAME_FIELD = 'username'  # Use `username` to log in
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']  # Required fields for user creation
@@ -33,7 +34,7 @@ class User(models.Model):
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2,validators=[ValidatePrice])
     thumbnail = models.ImageField(upload_to='course_thumbnails/', blank=True, null=True)
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses')
     
