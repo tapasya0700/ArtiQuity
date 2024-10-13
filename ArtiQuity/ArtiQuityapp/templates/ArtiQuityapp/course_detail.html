@@ -50,11 +50,18 @@
                            
                             {%endif%}
                             {% if role == 'student'%}
+                            {% if visibility == True%}
+                            {% if lesson.video_url %}
+                            <a href="{{ lesson.video_url }}" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
+                            {% endif %}
+                            
+                            {% else%}
                             {% if lesson.video_url %}
                                 <a href="#" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
                             {% endif %}
+                            {% endif%}
+                            {% endif%}
                            
-                            {%endif%}
 
                             
                         </li>

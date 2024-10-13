@@ -420,13 +420,25 @@ def reject_course(request, course_id):
 
 def course_detail_view(request, course_id):
     role=request.user.role
+    id=request.user.id
     print(role)
+    visibility=False
+    enrolled=None
     course = get_object_or_404(Course, id=course_id)
+    try: 
+        enrolled = Enrollment.objects.get(course_id=course_id)
+        if enrolled.student_id==id:
+            visibility=True
+    except:
+        pass
+    
     lessons = course.lessons.all()  # Retrieve all lessons for the course
     context = {
         'course': course,
         'lessons': lessons,
-        'role':role
+        'role':role,
+        'visibility':visibility
+
     }
     return render(request, 'ArtiQuityapp/course_detail.html', context)
 
@@ -501,14 +513,21 @@ def reset_password(request):
 @login_required
 def add_to_cart(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    cart_item, created = Cart.objects.get_or_create(user=request.user, course=course)
-    
-    if created:
-        cart_item.save()
-        return redirect('student_dashboard')
+    try:
+        enrolled=Enrollment.objects.get(course_id=course_id,student_id=request.user.id)
+    except:
+        pass
+    if( not enrolled):
+        cart_item, created = Cart.objects.get_or_create(user=request.user, course=course)
+        if created:
+            cart_item.save()
+            return redirect('student_dashboard')
+        else:
+            return redirect('view_cart')
     else:
-        return redirect('view_cart')
-    
+        print("You are already enrolled in the course")
+        return redirect('student_dashboard')
+     
 @login_required
 def view_cart(request):
     cart_items = Cart.objects.filter(user=request.user)
@@ -543,8 +562,7 @@ def checkout(request):
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-def process_payment(request):
-    login_required
+@login_required
 def process_payment(request):
     if request.method == 'POST':
         # Get payment details from form
@@ -650,10 +668,17 @@ def enrolled_courses(request):
     enrolls=Enrollment.objects.filter(student_id=request.user)
     if enrolls:
         en_course=[]
+        
         print(enrolls)
         for e in enrolls:
             en_course.append(Course.objects.filter(id=e.course_id).first())
+            print(e.id)
+            print(e.student_id)
+            print(e.course_id)
         print(en_course)
+        print(en_course[0].id)
+    
+    
         search_query = request.GET.get('search', '')
         if search_query:
             en_course_search=[]
@@ -663,9 +688,10 @@ def enrolled_courses(request):
                if search_course:
                    en_course_search.append(search_course.first())
             print(en_course_search)
+
             
             return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course_search}) 
         else:
-            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course})
+            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course })
     else:
         return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course})
