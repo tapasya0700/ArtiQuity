@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.conf import settings
 import stripe
 from ArtiQuityapp.models import Cart 
+from django.contrib import messages
 
 # Create your views here.
 def home(request):
@@ -513,6 +514,7 @@ def reset_password(request):
 @login_required
 def add_to_cart(request, course_id):
     course = get_object_or_404(Course, id=course_id)
+    enrolled=None
     try:
         enrolled=Enrollment.objects.get(course_id=course_id,student_id=request.user.id)
     except:
@@ -521,11 +523,12 @@ def add_to_cart(request, course_id):
         cart_item, created = Cart.objects.get_or_create(user=request.user, course=course)
         if created:
             cart_item.save()
+            messages.success(request,"Course has been added to your cart")
             return redirect('student_dashboard')
         else:
             return redirect('view_cart')
     else:
-        print("You are already enrolled in the course")
+        messages.error(request,"You are already enrolled in the course")
         return redirect('student_dashboard')
      
 @login_required
@@ -539,6 +542,7 @@ def view_cart(request):
 def remove_from_cart(request, course_id):
     cart_item = get_object_or_404(Cart, user=request.user, course_id=course_id)
     cart_item.delete()
+    messages.success(request," Course has been removed from your cart")
     return redirect('view_cart')
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
