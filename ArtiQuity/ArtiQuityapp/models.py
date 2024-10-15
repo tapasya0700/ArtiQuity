@@ -6,7 +6,7 @@ from .validations import *
 # 1. Users Table
 class User(models.Model):
     username = models.CharField(max_length=255, unique=True,validators=[ValidateUserName])
-    email = models.EmailField(max_length=255,validators=[ValidateEmail])
+    email = models.EmailField(max_length=255)
     password_hash = models.CharField(max_length=255)
     first_name = models.CharField(max_length=100,validators=[ValidateName])
     last_name = models.CharField(max_length=100,validators=[ValidateName])

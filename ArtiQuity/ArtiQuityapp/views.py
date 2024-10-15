@@ -22,6 +22,7 @@ from ArtiQuityapp.models import Cart
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
+from django.db import IntegrityError
 # Create your views here.
 def home(request):
     if(request.user):
@@ -134,9 +135,18 @@ def user_signup(request):
             # Hash the password before saving it
             raw_password = form.cleaned_data['password']
             user.password_hash = make_password(raw_password)
-            user.save()
-            print(user.id)
-            return redirect('user_login')  # Redirect to home page after successful signup
+            try:
+               user.save()
+               return redirect('user_login')
+            except IntegrityError as e:
+                # Catch the duplicate key error and show a user-friendly message
+                if 'duplicate key' in str(e):
+                    form.add_error('email', 'An account with this email already exists for this role.')
+                else:
+                    form.add_error(None, 'An unexpected error occurred. Please try again.')
+          
+            #print(user.id)
+              # Redirect to home page after successful signup
     else:
         form = UserSignupForm()
     return render(request, 'ArtiQuityapp/signup.html', {'form': form})
@@ -178,7 +188,7 @@ def user_login(request):
                 
                 return redirect('student_dashboard')
             else:
-                messages.error("Invalid Username or password")
+                messages.error(request,"Invalid Username or password")
                 
     else:
         form = UserLoginForm()
@@ -249,9 +259,17 @@ def instructor_signup(request):
             # Hash the password before saving it
             raw_password = form.cleaned_data['password']
             user.password_hash = make_password(raw_password)
-           
-            user.save()
-            return redirect('instructor_login')  # Redirect to home page after successful signup
+            try:
+               user.save()
+               return redirect('instructor_login')
+            except IntegrityError as e:
+                # Catch the duplicate key error and show a user-friendly message
+                if 'duplicate key' in str(e):
+                    form.add_error('email', 'An account with this email already exists for this role.')
+                else:
+                    form.add_error(None, 'An unexpected error occurred. Please try again.') 
+            
+              # Redirect to home page after successful signup
     else:
         form = InstructorSignupForm()
     return render(request, 'ArtiQuityapp/instructor_signup.html', {'form': form})
@@ -454,14 +472,15 @@ def course_detail_view(request, course_id):
 def forgot_password(request):
     if request.method == 'POST':
         form = ForgotPasswordForm(request.POST, request.FILES)
+
         if form.is_valid():
                   
             email=request.POST['email']
-           
+            role=request.POST['role']
             print(email)
 
             try:
-                user_obj = User.objects.get(email=email)
+                user_obj = User.objects.get(email=email,role=role)
                 print(user_obj.last_name)
                 token = generate_token()
                 user_obj.reset_password_token = token  # Save the token in the user table
