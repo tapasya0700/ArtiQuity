@@ -20,7 +20,8 @@ from django.conf import settings
 import stripe
 from ArtiQuityapp.models import Cart 
 from django.contrib import messages
-
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 # Create your views here.
 def home(request):
     if(request.user):
@@ -36,7 +37,7 @@ def about(request):
 def custom_authenticate(username, password):
     try:
         user = User.objects.get(username=username)
-        if user and password==user.password_hash:
+        if user and check_password(password,user.password_hash):
             user.is_authenticated = True
             user.last_login = timezone.now()
             user.save()
@@ -131,9 +132,11 @@ def user_signup(request):
         if form.is_valid():
             user = form.save(commit=False)
             # Hash the password before saving it
-            user.password_hash = form.cleaned_data['password']
+            raw_password = form.cleaned_data['password']
+            user.password_hash = make_password(raw_password)
             user.save()
-            return redirect('home')  # Redirect to home page after successful signup
+            print(user.id)
+            return redirect('user_login')  # Redirect to home page after successful signup
     else:
         form = UserSignupForm()
     return render(request, 'ArtiQuityapp/signup.html', {'form': form})
@@ -145,6 +148,7 @@ def user_login(request):
                   
             username = request.POST['username']
             password = request.POST['password']
+            
             print (username)
             print(password)
 
@@ -155,10 +159,10 @@ def user_login(request):
                 messages.error(request, "User does not exist. Please sign up first.")
                 return redirect('user_signup')
             
-
+            
             # Authenticate the user
             user = custom_authenticate(username,password)
-            print (user.password_hash)
+            #print (user.password_hash)
             if user is not None:
                 request.session['user_id'] = user.id
                 request.session['user_role'] = user.role
@@ -173,6 +177,8 @@ def user_login(request):
                 print(f"Session Data: {request.session.items()}")
                 
                 return redirect('student_dashboard')
+            else:
+                messages.error("Invalid Username or password")
                 
     else:
         form = UserLoginForm()
@@ -241,9 +247,11 @@ def instructor_signup(request):
         if form.is_valid():
             user = form.save(commit=False)
             # Hash the password before saving it
-            user.password_hash = form.cleaned_data['password']
+            raw_password = form.cleaned_data['password']
+            user.password_hash = make_password(raw_password)
+           
             user.save()
-            return redirect('home')  # Redirect to home page after successful signup
+            return redirect('instructor_login')  # Redirect to home page after successful signup
     else:
         form = InstructorSignupForm()
     return render(request, 'ArtiQuityapp/instructor_signup.html', {'form': form})
@@ -267,7 +275,7 @@ def instructor_login(request):
             
             # Authenticate the user
             user = custom_authenticate(username,password)
-            print (user.password_hash)
+           
             if user is not None:
                 request.session['user_id'] = user.id
                 request.session['user_role'] = user.role
@@ -284,7 +292,7 @@ def instructor_login(request):
                 
     
                 
-                 # Redirect to the home page after successful login
+                
             else:
                 messages.error(request, "Invalid username or password.")
     else:
@@ -669,33 +677,42 @@ def process_payment(request):
     return render(request, 'ArtiQuityapp/checkout.html')
 
 def enrolled_courses(request):
-    enrolls=Enrollment.objects.filter(student_id=request.user)
+    enrolls=None
+    en_course=[]
+    try:
+        enrolls=Enrollment.objects.filter(student_id=request.user)
+    except:
+        pass
     if enrolls:
-        en_course=[]
-        
-        print(enrolls)
-        for e in enrolls:
-            en_course.append(Course.objects.filter(id=e.course_id).first())
-            print(e.id)
-            print(e.student_id)
-            print(e.course_id)
-        print(en_course)
-        print(en_course[0].id)
-    
-    
-        search_query = request.GET.get('search', '')
-        if search_query:
-            en_course_search=[]
-            for e in en_course:
-               search_course = Course.objects.filter(title__icontains=search_query,id=e.id)
-               print(search_course)
-               if search_course:
-                   en_course_search.append(search_course.first())
-            print(en_course_search)
-
+           
             
-            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course_search}) 
-        else:
-            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course })
+            print(enrolls)
+            for e in enrolls:
+                en_course.append(Course.objects.filter(id=e.course_id).first())
+                print(e.id)
+                print(e.student_id)
+                print(e.course_id)
+            print(en_course)
+            print(en_course[0].id)
+        
+        
+            search_query = request.GET.get('search', '')
+            if search_query:
+                en_course_search=[]
+                for e in en_course:
+                    search_course = Course.objects.filter(title__icontains=search_query,id=e.id)
+                    print(search_course)
+                    if search_course:
+                        en_course_search.append(search_course.first())
+                        print(en_course_search)
+
+                
+                return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course_search}) 
+            else:
+                return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course })
     else:
-        return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course})
+            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course})
+  
+
+    
+    
