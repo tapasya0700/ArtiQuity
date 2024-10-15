@@ -5,12 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Signup</title>
+    <style>
+        .errorlist li {
+            color: red;  /* Change error message color to red */
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .form-error {
+            color: red;
+            font-size: 0.875rem; /* This sets the size similar to Tailwind's text-sm */
+        }
+    </style>
+    
     <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
+
 <body class="bg-gray-100">
 
     <!-- Navbar Section -->
@@ -108,18 +123,30 @@
     <div class="container mx-auto py-16 flex justify-center items-center">
         <!-- Left Section with Illustration -->
         <div class="hidden lg:block lg:w-1/2">
-            <img src="https://cdn.pixabay.com/photo/2018/05/19/00/53/online-education-3412473_1280.jpg" alt="Illustration" class="rounded-lg shadow-lg">
+            <img src="" alt="Illustration" class="rounded-lg shadow-lg">
         </div>
 
         <!-- Right Section with Form -->
         <div class="bg-white p-8 rounded-lg shadow-lg w-full lg:w-1/2">
             <h2 class="text-3xl font-bold mb-6 text-[#023047]">Sign Up and Start Learning</h2>
             <form method="POST" enctype="multipart/form-data" class="space-y-4">
-                {% if form.email.errors %}
-                    <div class="text-red-500 text-xs"> {{ form.email.errors }}</div>
-                {% endif %}
                 {% csrf_token %}
-                {{ form.as_p }}
+                {% for field in form %}
+                <div class="mb-4">
+                    <label for="{{ field.id_for_label }}" class="block font-medium text-gray-700">{{ field.label }}</label>
+                    {{ field }}
+                    
+                    <!-- Check if there are any errors for this field -->
+                    {% if field.errors %}
+                        <ul class="text-red-600 text-sm mt-1">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
                 <button type="submit" class="w-full bg-gray-600 text-white py-2 rounded-md hover:bg-gray-700 transition duration-300">Sign Up</button>
             </form>
 
