@@ -62,7 +62,15 @@ class LessonCreationForm(forms.ModelForm):
 
 
 class ForgotPasswordForm(forms.Form):
+    ROLE_CHOICES = [
+        ('student', 'Student'),
+        ('instructor', 'Instructor'),
+        ('admin', 'Admin'),
+    ]
+    
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Enter your email'}), required=True)
+    role = forms.ChoiceField(choices=ROLE_CHOICES, widget=forms.Select, required=True)
+
 
 class SetNewPasswordForm(forms.Form):
     new_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter new password'}), required=True)

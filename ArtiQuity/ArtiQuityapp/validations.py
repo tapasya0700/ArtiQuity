@@ -7,9 +7,9 @@ def ValidateEmail(email):
     from .models import User
    
     """ Validate that the email is unique. """
-    if User.objects.filter(email=email).exists():
-        raise ValidationError(f"A user with {email} already exists.")
-
+    #if User.objects.filter(email=email,role=request.user).exists():
+       #raise ValidationError(f"A user with {email} already exists.")
+    pass
 
 def ValidateName(name):
     """ Validate that the name contains only letters (a-z, A-Z). """
