@@ -24,8 +24,31 @@
             </div>
 
             <!-- Logout Button -->
-            <div class="flex items-center space-x-4">
-                <a href="{% url 'user_logout' %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Logout</a>
+            <div class="relative group">
+                <!-- Profile Section -->
+                <button class="flex items-center space-x-3 bg-gray-100 text-gray-700 px-4 py-2 rounded-full focus:outline-none hover:bg-gray-200 transition duration-300">
+                    <!-- Profile Picture -->
+                    <img src="{% if request.user.profile_picture %} {{ request.user.profile_picture.url }} {% else %} https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png {% endif %}" 
+                         alt="Profile" class="w-10 h-10 rounded-full shadow-md object-cover">
+            
+                    <!-- Username -->
+                    <span class="font-medium text-gray-800">{{ request.user.username }}</span>
+                    
+                    <!-- Dropdown Icon -->
+                    <i class="fas fa-caret-down text-gray-500"></i>
+                </button>
+            
+                <!-- Dropdown Menu -->
+                <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex transition ease-in-out duration-150 z-50">
+                    <!-- Dropdown Links -->
+                    <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
+                    {% if role == 'student'%}
+                    <a href="{% url 'enrolled_courses' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Learning</a>
+                    <a href="{% url 'view_cart' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Cart</a>
+                    {%endif%}
+                    <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">Account Settings</a>
+                    <a href="{% url 'user_logout' %}" class="block px-4 py-3 text-red-600 hover:bg-gray-100">Logout</a>
+                </div>
             </div>
         </div>
     </nav>
