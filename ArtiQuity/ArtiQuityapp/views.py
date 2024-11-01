@@ -118,7 +118,7 @@ def create_lesson(request, course_id):
             lesson.course = course
             lesson.save()
             messages.success(request, 'Lesson added successfully!')
-            return redirect('instructor_dashboard')
+            return redirect(course_detail_view,lesson.course_id)
     else:
         form = LessonCreationForm()
     
@@ -137,6 +137,7 @@ def user_signup(request):
             user.password_hash = make_password(raw_password)
             try:
                user.save()
+               messages.success("Student account created successfully")
                return redirect('user_login')
             except IntegrityError as e:
                 # Catch the duplicate key error and show a user-friendly message
@@ -228,26 +229,44 @@ def admin_login(request):
     return render(request, 'ArtiQuityapp/admin_login.html', {'form': form})
 
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import User, Course
 def admin_dashboard(request):
     # Check if the logged-in user has the role of 'admin'
     if request.session.get('user_role') != 'admin':
         messages.error(request, "Access denied! Only admins can access this page.")
         return redirect('home')
 
-    # If the user is an admin, render the custom admin dashboard
-    users=User.objects.all()
-    user_count=users.count()
+    # Retrieve all users and count them
+    users = User.objects.all()
+    user_count = users.count()
+
+    # Retrieve all courses and filter approved ones for counting active courses
     courses = Course.objects.all()
-    active_courses=Course.objects.filter(status='approved').count()
+    active_courses_count = courses.filter(status='approved').count()
+
+    # Filter courses with status 'pending'
+    pending_courses = courses.filter(status='pending')
+
+    # Search functionality for courses
     search_query = request.GET.get('search', '')
     if search_query:
         courses = courses.filter(title__icontains=search_query)
-    print(courses)
 
+    # Debug print statement (optional, remove in production)
+    print(f"Filtered courses: {courses}")
 
-    return render(request, 'ArtiQuityapp/admin_dashboard.html', {'courses': courses,'users':users,'user_count':user_count,'active_courses':active_courses})
-
-
+    # Render the admin dashboard with context data
+    context = {
+        'courses': courses,
+        'users': users,
+        'user_count': user_count,
+        'active_courses_count': active_courses_count,
+        'pending_courses': pending_courses,
+        'search_query': search_query  # Pass the search query to maintain it in the template
+    }
+    return render(request, 'ArtiQuityapp/admin_dashboard.html', context)
 
 
 
@@ -261,6 +280,7 @@ def instructor_signup(request):
             user.password_hash = make_password(raw_password)
             try:
                user.save()
+               messages.success("Instuctor account created successfully")
                return redirect('instructor_login')
             except IntegrityError as e:
                 # Catch the duplicate key error and show a user-friendly message
@@ -347,16 +367,26 @@ def edit_course(request, course_id):
 @login_required
 def delete_course(request, course_id):
     course = get_object_or_404(Course, id=course_id, instructor=request.user)
+    
     old_image_path = course.thumbnail.path if course.thumbnail else None
-   
+    #try:
+    is_enrolled=Enrollment.objects.filter(course_id=course_id)
+    print(is_enrolled)
     if request.method == 'POST':
-        if 'thumbnail' in request.FILES and old_image_path:
+        if not is_enrolled.exists():
+            if 'thumbnail' in request.FILES and old_image_path:
                 if os.path.isfile(old_image_path):
                     os.remove(old_image_path)  # Remove the old image file
-        course.delete()
-        messages.success(request, 'Course deleted successfully!')
-        return redirect('instructor_dashboard')
-    
+            course.delete()
+            messages.success(request, 'Course deleted successfully!')
+            return redirect('instructor_dashboard')
+        else:
+            messages.error(request,"Course cannot be deleted")
+            return redirect('instructor_dashboard')
+
+    #except:
+        #messages.error(request,"something went wrong")
+
     return render(request, 'ArtiQuityapp/confirm_delete.html', {'course': course})
 
 
@@ -364,12 +394,13 @@ def delete_course(request, course_id):
 @login_required
 def edit_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, course__instructor=request.user)
+    
     if request.method == 'POST':
         form = LessonCreationForm(request.POST, request.FILES, instance=lesson)
         if form.is_valid():
             form.save()
             messages.success(request, 'Lesson updated successfully!')
-            return redirect('instructor_dashboard')
+            return redirect(course_detail_view,lesson.course_id)
     else:
         form = LessonCreationForm(instance=lesson)
     
@@ -383,9 +414,9 @@ def delete_lesson(request, lesson_id):
     if request.method == 'POST':
         lesson.delete()
         messages.success(request, 'Lesson deleted successfully!')
-        return redirect('instructor_dashboard')
+        return redirect(course_detail_view,lesson.course_id)
     
-    return render(request, 'ArtiQuityapp/confirm_delete.html', {'lesson': lesson})
+    return render(request, 'ArtiQuityapp/lesson_delete.html', {'lesson': lesson})
 
 def user_logout(request):
     logout(request)
@@ -456,6 +487,7 @@ def course_detail_view(request, course_id):
         enrolled = Enrollment.objects.get(course_id=course_id)
         if enrolled.student_id==id:
             visibility=True
+            
     except:
         pass
     
@@ -577,17 +609,23 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 # Checkout View
 def checkout(request):
     cart_items = Cart.objects.filter(user=request.user)
+    
+    # Check if the cart is empty
+    if not cart_items.exists():
+        messages.error(request, "Your cart is empty. Please add courses before proceeding to checkout.")
+        return redirect('view_cart')  # Redirect to the cart page or any relevant page
+
     total_price = sum(item.course.price for item in cart_items)
     print(cart_items)
     print(total_price)
+
     # Display the checkout page
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
-          'stripe_publishable_key': settings.STRIPE_PUBLIC_KEY
+        'stripe_publishable_key': settings.STRIPE_PUBLIC_KEY
     }
     return render(request, 'ArtiQuityapp/checkout.html', context)
-
 
  # Assuming Cart model is defined
 

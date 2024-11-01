@@ -7,51 +7,46 @@
     <title>{{ course.title }} - Course Details</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        function showAlert(event) {
+            alert("Please enroll in course first");
+        }
+    </script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50"> <!-- Light beige background to complement header and footer -->
     <!-- Navbar Section -->
     <nav class="bg-[#77390c] shadow-md">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <!-- Logo Section -->
             <a href="#" class="text-2xl font-bold text-white">ArtiQuity</a>
-
-            <!-- Navigation Links -->
             <div class="hidden md:flex items-center space-x-4">
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">Home</a>
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">Courses</a>
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">About</a>
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">Contact</a>
             </div>
-
-            <!-- Logout Button -->
             <div class="relative group">
-                <!-- Profile Section -->
                 <button class="flex items-center space-x-3 bg-gray-100 text-gray-700 px-4 py-2 rounded-full focus:outline-none hover:bg-gray-200 transition duration-300">
-                    <!-- Profile Picture -->
                     <img src="{% if request.user.profile_picture %} {{ request.user.profile_picture.url }} {% else %} https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png {% endif %}" 
                          alt="Profile" class="w-10 h-10 rounded-full shadow-md object-cover">
-            
-                    <!-- Username -->
                     <span class="font-medium text-gray-800">{{ request.user.username }}</span>
-                    
-                    <!-- Dropdown Icon -->
                     <i class="fas fa-caret-down text-gray-500"></i>
                 </button>
-            
-                <!-- Dropdown Menu -->
                 <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex transition ease-in-out duration-150 z-50">
-                    <!-- Dropdown Links -->
                     <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
-                    {% if role == 'student'%}
+                    {% if role == 'student' %}
                     <a href="{% url 'enrolled_courses' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Learning</a>
                     <a href="{% url 'view_cart' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Cart</a>
-                    {%endif%}
+                    {% endif %}
                     <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">Account Settings</a>
                     <a href="{% url 'user_logout' %}" class="block px-4 py-3 text-red-600 hover:bg-gray-100">Logout</a>
                 </div>
             </div>
         </div>
     </nav>
+    <div id="alert-message" class="hidden bg-red-500 text-white p-4 rounded-md mb-4 text-center">
+        Enroll in the course first!
+    </div>
     {% if messages %}
     <div class="mb-4">
         {% for message in messages %}
@@ -102,54 +97,92 @@
 
     <!-- Course Details Section -->
     <div class="container mx-auto px-4 py-12">
-        <div class="bg-white shadow-md rounded-lg p-8">
-            <h1 class="text-4xl font-bold text-[#2c3e50] mb-4">{{ course.title }}</h1>
-            <p class="text-lg text-gray-600 mb-6">{{ course.description }}</p>
-            
-            <h2 class="text-3xl font-semibold text-[#2c3e50] mb-4">Course Lessons</h2>
-            {% if lessons %}
-                <ul class="list-disc list-inside space-y-4">
-                    {% for lesson in lessons %}
-                        <li>
-                            <h3 class="text-xl font-medium text-gray-800">{{ lesson.title }}</h3>
-                            <p class="text-gray-600">{{ lesson.content }}</p>
-                            {% if role == 'instructor'%}
-                            {% if lesson.video_url %}
-                                <a href="{{ lesson.video_url }}" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
-                            {% endif %}
-                           
-                            {%endif%}
-                            {% if role == 'student'%}
-                            {% if visibility == True%}
-                            {% if lesson.video_url %}
-                            <a href="{{ lesson.video_url }}" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
-                            {% endif %}
-                            
-                            {% else%}
-                            {% if lesson.video_url %}
-                                <a href="#" class="text-blue-500 hover:underline" target="_blank">Watch Video</a>
-                            {% endif %}
-                            {% endif%}
-                            {% endif%}
-                           
+        <div class="bg-white shadow-md rounded-lg p-8 border-t-4 border-[#b5651d]"> <!-- Warm brown border -->
+            <h1 class="text-4xl font-bold text-[#5a3220] mb-4">{{ course.title }}</h1> <!-- Dark brown heading -->
+            <p class="text-lg text-[#7a5230] mb-6">{{ course.description }}</p> <!-- Slightly lighter brown text -->
 
-                            
-                        </li>
-                    {% endfor %}
-                </ul>
+            <h2 class="text-3xl font-semibold text-[#b5651d] mb-4">Course Lessons</h2> <!-- Warm brown title -->
+            {% if lessons %}
+            <div class="space-y-6">
+                {% for lesson in lessons %}
+                    <div class="bg-[#f2e4db] p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 border-l-4 border-[#77390c]"> <!-- Light brown background with header color border -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <h3 class="text-lg font-semibold text-[#5a3220]">{{ lesson.title }}</h3>
+                                {% if role == 'instructor' %}
+                                    <div class="flex items-center space-x-3">
+                                        <a href="{% url 'edit_lesson' lesson.id %}" class="text-[#e1b12c] hover:text-[#fbc531] transition duration-300" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'delete_lesson' lesson.id %}" class="text-[#d63031] hover:text-[#c0392b] transition duration-300" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="text-[#7a5230] mt-2">{{ lesson.content }}</p> <!-- Content in soft brown -->
+                        {% if role == 'instructor'%}
+                        {% if lesson.video_url %}
+                            <div class="mt-4">
+                                <a href="{{ lesson.video_url }}" class="text-[#77390c] font-medium hover:underline" target="_blank">
+                                    <i class="fas fa-play-circle"></i> Watch Video
+                                </a>
+                            </div>
+                        {%endif%}
+                        {%endif%}
+                        {% if role == 'student'%}
+                        {% if visibility == True%}
+                        {% if lesson.video_url %}
+                        <div class="mt-4">
+                            <a href="{{ lesson.video_url }}" class="text-[#77390c] font-medium hover:underline" target="_blank">
+                                <i class="fas fa-play-circle"></i> Watch Video
+                            </a>
+                        </div>
+
+                        {% endif %}
+                        {%else%}
+                        {% if lesson.video_url %}
+                        <div class="mt-4">
+                            <a href="" class="text-[#77390c] font-medium hover:underline" target="_blank" onclick="showAlert(event)">
+                                <i class="fas fa-play-circle"></i> Watch Video
+                            </a>
+                        </div>
+                        {%endif%}
+                        {%endif%}
+                        {%endif%}
+
+                    </div>
+                {% endfor %}
+            </div>
             {% else %}
-                <p class="text-red-500">No lessons available for this course yet.</p>
+                <p class="text-[#d63031]">No lessons available for this course yet.</p>
             {% endif %}
-            {% if role == 'instructor'%}
-            <div class="mt-10 text-center">
-                <a href="{% url 'instructor_dashboard' %}" class="text-[#40dae2] font-medium hover:text-[#023047] hover:underline transition duration-300">← Back to Dashboard</a>
+
+            {% if role == 'instructor' %}
+            <div class="mt-10 text-center flex justify-center space-x-8">
+                <a href="{% url 'instructor_dashboard' %}" class="text-[#1b4965] font-semibold hover:text-[#126782] transition duration-300 flex items-center space-x-2">
+                    <i class="fas fa-arrow-left text-[#1b4965] bg-[#d9f2f8] rounded-full p-2"></i> <!-- Icon color and background -->
+                    <span class="no-underline hover:underline">Back to Dashboard</span>
+                </a>
+                <a href="{% url 'create_lesson' course.id %}" class="text-[#e63946] font-semibold hover:text-[#bf3b3f] transition duration-300 flex items-center space-x-2">
+                    <i class="fas fa-plus-circle text-[#e63946] bg-[#fde8e8] rounded-full p-2"></i> <!-- Icon color and background -->
+                    <span class="no-underline hover:underline">Add Lesson</span>
+                </a>
             </div>
-            {%endif%}
-            {% if role == 'student'%}
-            <div class="mt-10 text-center">
-                <a href="{% url 'student_dashboard' %}" class="text-[#40dae2] font-medium hover:text-[#023047] hover:underline transition duration-300">← Back to Dashboard</a>
+            
+            
+            
+            
+            {% endif %}
+            {% if role == 'student' %}
+            <div class="mt-10 text-center flex justify-center space-x-8">
+                <a href="{% url 'student_dashboard' %}" class="text-[#5a3220] font-semibold hover:text-[#b5651d] transition duration-300 flex items-center space-x-2">
+                    <i class="fas fa-arrow-left text-[#5a3220] bg-[#f2e4db] rounded-full p-2"></i>
+                    <span class="no-underline hover:underline">Back to Dashboard</span>
+                </a>
             </div>
-            {%endif%}
+            {% endif %}
         </div>
     </div>
 
