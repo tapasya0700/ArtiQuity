@@ -7,6 +7,21 @@
     <title>Create New Course</title>
     <link rel="stylesheet" href="{% static 'ArtiQuityapp/style.css' %}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        input, textarea, select {
+            border: 2px solid #ccc; /* Visible border color */
+            border-radius: 4px; /* Rounded corners */
+            padding: 8px; /* Space inside the input */
+            transition: border-color 0.3s; /* Smooth transition on hover/focus */
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #40dae2; /* Change border color on focus */
+            outline: none; /* Remove default outline */
+            box-shadow: 0 0 5px rgba(64, 218, 226, 0.5); /* Optional box shadow */
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 
@@ -121,17 +136,25 @@
                 {{ field }}
             </div>
             {% endfor %}
+            <div class="flex justify-center space-x-4 mt-8">
+                <!-- Save Changes Button -->
+                <button type="submit" class="bg-[#1d3557] text-white px-10 py-3 rounded-md hover:bg-[#457b9d] shadow-md hover:shadow-lg transition duration-300 flex items-center space-x-2">
+                    <i class="fas fa-save"></i> <!-- Save Icon -->
+                    <span>Save Changes</span>
+                </button>
+            
+                <!-- Cancel Button -->
+                <a href="{% url 'instructor_dashboard' %}" class="bg-red-600 text-white px-10 py-3 rounded-md hover:bg-[#e63946] shadow-md hover:shadow-lg transition duration-300 flex items-center space-x-2">
+                    <i class="fas fa-times-circle"></i> <!-- Cancel Icon -->
+                    <span>Cancel</span>
+                </a>
+            </div>
             
             <!-- Submit Button (Centered) -->
-            <div class="flex justify-center mt-8">
-                <button type="submit" class="bg-[#023047] text-white px-10 py-3 rounded-md hover:bg-[#01456e] shadow-md hover:shadow-lg transition duration-300">Create Course</button>
-            </div>
+         
         </form>
 
-        <!-- Back to Dashboard Link (Centered) -->
-        <div class="mt-10 text-center">
-            <a href="{% url 'instructor_dashboard' %}" class="text-[#40dae2] font-medium hover:text-[#023047] hover:underline transition duration-300">← Back to Dashboard</a>
-        </div>
+       
     </div>
 </div>
 

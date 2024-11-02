@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructor Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body class="bg-gray-50">
 
@@ -134,17 +137,36 @@
                         <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
                         
                         <!-- Card Buttons -->
-                        <div class="flex justify-between items-center">
-                            <a href="{% url 'create_lesson' course.id %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Add Lesson</a>
-                            <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
-                            <a href="{% url 'edit_course' course.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Edit</a>
-                            <a href="{% url 'delete_course' course.id %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Delete</a>
-                            {% if course.status == 'draft' and not course.is_sent_for_approval %}
-                            <a href="{% url 'send_course_for_approval' course.id %}" class="btn send-approval-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition duration-300">
-                                Send for Approval
+                        
+                          
+                        <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
+                            <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-eye"></i>
+                                <span class="font-medium">View</span>
                             </a>
-                        {% endif %}
+                            <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-edit"></i>
+                                <span class="font-medium">Edit</span>
+                            </a>
+                            <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-trash-alt"></i>
+                                <span class="font-medium">Delete</span>
+                            </a>
+                        
+                        
+                            {% if course.status == 'draft' and not course.is_sent_for_approval %}
+                            <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-paper-plane"></i>
+                                <span class="font-medium">Send for Approval</span>
+                            </a>
+                            {% endif %}
                         </div>
+                        
+                        
+                        
+                        
+                        
+                        
                     </div>
                 </div>
                 {% endfor %}
@@ -168,14 +190,24 @@
                 <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.rejection_reason }}</p>
                 
                 <!-- Card Buttons -->
-                <div class="flex justify-between items-center">
-                    <a href="{% url 'create_lesson' course.id %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Add Lesson</a>
-                    <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
-                    <a href="{% url 'edit_course' course.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Edit</a>
-                    <a href="{% url 'delete_course' course.id %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Delete</a>
+                <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
+                    <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-eye"></i>
+                        <span class="font-medium">View</span>
+                    </a>
+                    <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-edit"></i>
+                        <span class="font-medium">Edit</span>
+                    </a>
+                    <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-trash-alt"></i>
+                        <span class="font-medium">Delete</span>
+                    </a>
+                
                     {% if course.status == 'rejected'  %}
-                    <a href="{% url 'send_course_for_approval' course.id %}" class="btn send-approval-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition duration-300">
-                       Re Send for Approval
+                    <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-paper-plane"></i>
+                        <span class="font-medium"> Re-Send for Approval</span>
                     </a>
                 {% endif %}
 
@@ -203,12 +235,19 @@
                 
                 
                 <!-- Card Buttons -->
-                <div class="flex justify-between items-center">
-                    <a href="{% url 'create_lesson' course.id %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Add Lesson</a>
-                    <a href="{% url 'course_detail' course.id %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
-                    <a href="{% url 'edit_course' course.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Edit</a>
-                    <a href="{% url 'delete_course' course.id %}" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">Delete</a>
-
+                <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
+                    <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-eye"></i>
+                        <span class="font-medium">View</span>
+                    </a>
+                    <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-edit"></i>
+                        <span class="font-medium">Edit</span>
+                    </a>
+                    <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-trash-alt"></i>
+                        <span class="font-medium">Delete</span>
+                    </a>
 
                 </div>
             </div>
