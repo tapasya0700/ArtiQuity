@@ -48,20 +48,34 @@ def custom_authenticate(username, password):
     return None
 @login_required
 def instructor_dashboard(request):
-
+    # Debug information for the logged-in user
     print(f"User logged in: {request.user.username}")  # Print the logged-in user
     print(f"User role: {request.user.role}")
+
+    # Check if the user has the role of 'instructor'
     if request.user.role != 'instructor':
         messages.error(request, "Access denied! Only instructors can access this page.")
         return redirect('home')
 
-    # Get courses created by the instructor
-    courses = Course.objects.filter(instructor=request.user)
+    # Retrieve all courses created by the instructor
+    all_courses = Course.objects.filter(instructor=request.user)
+    approved_courses = all_courses.filter(status='approved')
+    rejected_courses = all_courses.filter(status='rejected')
+
+    # Apply search filter if a query is provided
     search_query = request.GET.get('search', '')
     if search_query:
-        courses = courses.filter(title__icontains=search_query)
+        all_courses = all_courses.filter(title__icontains=search_query)
+        approved_courses = approved_courses.filter(title__icontains=search_query)
+        rejected_courses = rejected_courses.filter(title__icontains=search_query)
 
-    return render(request, 'ArtiQuityapp/instructor_dashboard.html', {'courses': courses})
+    # Render the dashboard template with the filtered courses
+    return render(request, 'ArtiQuityapp/instructor_dashboard.html', {
+        'all_courses': all_courses,
+        'approved_courses': approved_courses,
+        'rejected_courses': rejected_courses,
+        'search_query': search_query  # Pass the search query to maintain it in the template if needed
+    })
 
 @login_required
 def student_dashboard(request):
@@ -112,17 +126,18 @@ def create_lesson(request, course_id):
         return redirect('instructor_dashboard')
 
     if request.method == 'POST':
-        form = LessonCreationForm(request.POST)
+        form = LessonCreationForm(request.POST, request.FILES)
         if form.is_valid():
             lesson = form.save(commit=False)
             lesson.course = course
             lesson.save()
             messages.success(request, 'Lesson added successfully!')
-            return redirect(course_detail_view,lesson.course_id)
+            return redirect('course_detail', course_id=lesson.course_id)
     else:
         form = LessonCreationForm()
     
     return render(request, 'ArtiQuityapp/create_lesson.html', {'form': form, 'course': course})
+
 
 
 
@@ -137,7 +152,7 @@ def user_signup(request):
             user.password_hash = make_password(raw_password)
             try:
                user.save()
-               messages.success("Student account created successfully")
+               messages.success(request,"Student account created successfully")
                return redirect('user_login')
             except IntegrityError as e:
                 # Catch the duplicate key error and show a user-friendly message
@@ -280,7 +295,7 @@ def instructor_signup(request):
             user.password_hash = make_password(raw_password)
             try:
                user.save()
-               messages.success("Instuctor account created successfully")
+               messages.success(request,"Instuctor account created successfully")
                return redirect('instructor_login')
             except IntegrityError as e:
                 # Catch the duplicate key error and show a user-friendly message
@@ -392,29 +407,48 @@ def delete_course(request, course_id):
 
 # Edit a Lesson
 @login_required
+
 def edit_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, course__instructor=request.user)
+    old_video_path = lesson.video_file.path if lesson.video_file else None  # Store the path of the old video file
     
     if request.method == 'POST':
         form = LessonCreationForm(request.POST, request.FILES, instance=lesson)
         if form.is_valid():
-            form.save()
+            # Check if a new video file is being uploaded
+            if 'video_file' in request.FILES:
+                # Remove the old video file if it exists
+                if old_video_path and os.path.isfile(old_video_path):
+                    os.remove(old_video_path)
+                    
+                # Update the video file with the new one
+                lesson.video_file = request.FILES['video_file']
+            
+            form.save()  # Save the form to update the database
             messages.success(request, 'Lesson updated successfully!')
-            return redirect(course_detail_view,lesson.course_id)
+            return redirect('course_detail', lesson.course_id)
     else:
         form = LessonCreationForm(instance=lesson)
     
     return render(request, 'ArtiQuityapp/edit_lesson.html', {'form': form, 'lesson': lesson})
 
 
+
 # Delete a Lesson
 @login_required
+
 def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, course__instructor=request.user)
+    video_path = lesson.video_file.path if lesson.video_file else None  # Get the path of the video file
+
     if request.method == 'POST':
-        lesson.delete()
+        # Remove the video file if it exists
+        if video_path and os.path.isfile(video_path):
+            os.remove(video_path)
+        
+        lesson.delete()  # Delete the lesson from the database
         messages.success(request, 'Lesson deleted successfully!')
-        return redirect(course_detail_view,lesson.course_id)
+        return redirect('course_detail', lesson.course_id)  # Ensure 'course_detail' is the correct view name
     
     return render(request, 'ArtiQuityapp/lesson_delete.html', {'lesson': lesson})
 
@@ -481,13 +515,18 @@ def course_detail_view(request, course_id):
     id=request.user.id
     print(role)
     visibility=False
-    enrolled=None
+    enrolled=[]
+    
     course = get_object_or_404(Course, id=course_id)
+    print(course)
+    
     try: 
-        enrolled = Enrollment.objects.get(course_id=course_id)
-        if enrolled.student_id==id:
+        enrolled = Enrollment.objects.get(course_id=course.id,student_id=id)
+        print(enrolled)
+        if enrolled:
             visibility=True
-            
+            print(visibility)
+
     except:
         pass
     

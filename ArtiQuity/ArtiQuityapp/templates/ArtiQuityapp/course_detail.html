@@ -123,34 +123,58 @@
                         </div>
                         <p class="text-[#7a5230] mt-2">{{ lesson.content }}</p> <!-- Content in soft brown -->
                         {% if role == 'instructor'%}
-                        {% if lesson.video_url %}
-                            <div class="mt-4">
-                                <a href="{{ lesson.video_url }}" class="text-[#77390c] font-medium hover:underline" target="_blank">
-                                    <i class="fas fa-play-circle"></i> Watch Video
-                                </a>
+                        {% if lesson.video_file %}
+                        <div >
+                            <div class="flex">
+                                <video controls class="w-1/2 md:w-1/3 rounded-md shadow-sm" style="max-height: 250px;">
+                                    <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
                             </div>
-                        {%endif%}
-                        {%endif%}
-                        {% if role == 'student'%}
-                        {% if visibility == True%}
-                        {% if lesson.video_url %}
-                        <div class="mt-4">
-                            <a href="{{ lesson.video_url }}" class="text-[#77390c] font-medium hover:underline" target="_blank">
-                                <i class="fas fa-play-circle"></i> Watch Video
-                            </a>
+                           
                         </div>
+                        
+                        
+                        
+                        
+                        {%endif%}
+                        {%endif%}
+                    {% if role == 'student'%}
+                        {{visibility}}
+                        {% if visibility == True %}
+                        {% if lesson.video_file %}
+                        
+                        
+                        <div >
+                            
+                            <div class="flex">
+                                <video controls class="w-1/2 md:w-1/3 rounded-md shadow-sm" style="max-height: 250px;">
+                                    <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            
+                        </div>
+                        
+                        {%endif%}
 
-                        {% endif %}
                         {%else%}
-                        {% if lesson.video_url %}
-                        <div class="mt-4">
-                            <a href="" class="text-[#77390c] font-medium hover:underline" target="_blank" onclick="showAlert(event)">
-                                <i class="fas fa-play-circle"></i> Watch Video
-                            </a>
+                        {% if lesson.video_file %}
+                        <div >
+                            <div class="flex">
+                                <video controls class="w-1/2 md:w-1/3 rounded-md shadow-sm" style="max-height: 250px;" onplay="this.pause(); alert('Please enroll in the course first');">
+                                    <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            
+                            
                         </div>
-                        {%endif%}
-                        {%endif%}
-                        {%endif%}
+                    {%endif%}
+                    {%endif%}
+                       
+                    {%endif%}
+                    
 
                     </div>
                 {% endfor %}

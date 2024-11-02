@@ -70,15 +70,20 @@ class Course(models.Model):
 
 
 # 3. Lessons Table
+import os
 class Lesson(models.Model):
+    def lesson_upload_path(instance, filename):
+        # Create a directory for each course based on its ID
+        return os.path.join('media', f'course_{instance.course.id}', filename)
+
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=255)
-    video_url = models.CharField(max_length=255, blank=True, null=True)
+    video_file = models.FileField(upload_to=lesson_upload_path, blank=True, null=True)
     content = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self):
         return self.title
 
 

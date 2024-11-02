@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructor Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -29,30 +27,20 @@
             <div class="relative group">
                 <!-- Profile Section -->
                 <button class="flex items-center space-x-3 bg-gray-100 text-gray-700 px-4 py-2 rounded-full focus:outline-none hover:bg-gray-200 transition duration-300">
-                    <!-- Profile Picture -->
-                    <img src="{% if request.user.profile_picture %} {{ request.user.profile_picture.url }} {% else %} https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png {% endif %}" 
+                    <img src="{% if request.user.profile_picture %}{{ request.user.profile_picture.url }}{% else %}https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png{% endif %}" 
                          alt="Profile" class="w-10 h-10 rounded-full shadow-md object-cover">
-            
-                    <!-- Username -->
                     <span class="font-medium text-gray-800">{{ request.user.username }}</span>
-                    
-                    <!-- Dropdown Icon -->
                     <i class="fas fa-caret-down text-gray-500"></i>
                 </button>
-            
-                <!-- Dropdown Menu -->
                 <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex transition ease-in-out duration-150 z-50">
-                    <!-- Dropdown Links -->
                     <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
-
                     <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">Account Settings</a>
                     <a href="{% url 'user_logout' %}" class="block px-4 py-3 text-red-600 hover:bg-gray-100">Logout</a>
                 </div>
             </div>
-
-
         </div>
     </nav>
+
     {% if messages %}
     <div class="mb-4">
         {% for message in messages %}
@@ -89,7 +77,6 @@
                 <div class="flex-grow">
                     {{ message }}
                 </div>
-                <!-- Close Button -->
                 <button onclick="document.getElementById('alert-{{ forloop.counter }}').style.display='none'" class="ml-4 text-white hover:text-gray-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -100,8 +87,9 @@
         {% endfor %}
     </div>
     {% endif %}
+
     <!-- Instructor Dashboard Content -->
-    <div class="container mx-auto px-4 ">
+    <div class="container mx-auto px-4">
         <!-- Header Section -->
         <header class="text-center mb-8">
             <h1 class="text-4xl font-bold text-[#2c3e50]">Welcome to the Instructor Dashboard, {{ request.user.username }}!</h1>
@@ -121,24 +109,22 @@
                 </button>
             </form>
         </div>
-        <!-- Courses Section -->
+
+        <!-- All Courses Section -->
         <section class="courses-section">
-            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Your Courses</h2>
+            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">All Courses</h2>
+            {% if all_courses %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course in courses %}
+                {% for course in all_courses %}
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-                    <!-- Course Thumbnail -->
                     <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
-                    
-                    <!-- Course Info -->
                     <div class="p-4">
                         <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
                         <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
                         <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
-                        
-                        <!-- Card Buttons -->
-                        
-                          
+                        {% if course.status == 'rejected'%}
+                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.rejection_reason }}</p>
+                        {%endif%}
                         <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
                             <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-eye"></i>
@@ -152,113 +138,103 @@
                                 <i class="fas fa-trash-alt"></i>
                                 <span class="font-medium">Delete</span>
                             </a>
-                        
-                        
-                            {% if course.status == 'draft' and not course.is_sent_for_approval %}
+                            {%if course.status == 'draft'%}
                             <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-paper-plane"></i>
-                                <span class="font-medium">Send for Approval</span>
+                                <span class="font-medium">Submit review</span>
                             </a>
-                            {% endif %}
+                            {%endif%}
+                            {%if course.status == 'rejected'%}
+                            <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-paper-plane"></i>
+                                <span class="font-medium">Submit review</span>
+                            </a>
+                            {%endif%}
                         </div>
-                        
-                        
-                        
-                        
-                        
-                        
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <p class="text-center text-gray-600 mt-4">No courses available to display.</p>
+            {% endif %}
         </section>
-   <!-- Courses Section -->
-   <section class="courses-section">
-    <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Rejected Courses</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {% for course in courses %}
-        {% if course.status == 'rejected' %}
-        <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-            <!-- Course Thumbnail -->
-            <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
-            
-            <!-- Course Info -->
-            <div class="p-4">
-                <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
-                <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
-                <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
-                <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.rejection_reason }}</p>
-                
-                <!-- Card Buttons -->
-                <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
-                    <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
-                        <i class="fas fa-eye"></i>
-                        <span class="font-medium">View</span>
-                    </a>
-                    <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
-                        <i class="fas fa-edit"></i>
-                        <span class="font-medium">Edit</span>
-                    </a>
-                    <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
-                        <i class="fas fa-trash-alt"></i>
-                        <span class="font-medium">Delete</span>
-                    </a>
-                
-                    {% if course.status == 'rejected'  %}
-                    <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
-                        <i class="fas fa-paper-plane"></i>
-                        <span class="font-medium"> Re-Send for Approval</span>
-                    </a>
-                {% endif %}
 
+        <!-- Approved Courses Section -->
+        <section class="courses-section">
+            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Approved Courses</h2>
+            {% if approved_courses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for course in approved_courses %}
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
+                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
+                        <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
+                            <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-eye"></i>
+                                <span class="font-medium">View</span>
+                            </a>
+                            <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-edit"></i>
+                                <span class="font-medium">Edit</span>
+                            </a>
+                            <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-trash-alt"></i>
+                                <span class="font-medium">Delete</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-        </div>
-        {% endif%}
-        {% endfor %}
-    </div>
-</section>
-<section class="courses-section">
-    <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Approved Courses</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {% for course in courses %}
-        {% if course.status == 'approved' %}
-        <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-            <!-- Course Thumbnail -->
-            <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
-            
-            <!-- Course Info -->
-            <div class="p-4">
-                <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
-                <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
-                <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
-                
-                
-                <!-- Card Buttons -->
-                <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
-                    <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
-                        <i class="fas fa-eye"></i>
-                        <span class="font-medium">View</span>
-                    </a>
-                    <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
-                        <i class="fas fa-edit"></i>
-                        <span class="font-medium">Edit</span>
-                    </a>
-                    <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
-                        <i class="fas fa-trash-alt"></i>
-                        <span class="font-medium">Delete</span>
-                    </a>
+            {% else %}
+            <p class="text-center text-gray-600 mt-4">No approved courses available.</p>
+            {% endif %}
+        </section>
 
+        <!-- Rejected Courses Section -->
+        <section class="courses-section">
+            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Rejected Courses</h2>
+            {% if rejected_courses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for course in rejected_courses %}
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
+                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
+                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
+                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.rejection_reason }}</p>
+                        <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
+                            <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-eye"></i>
+                                <span class="font-medium">View</span>
+                            </a>
+                            <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-edit"></i>
+                                <span class="font-medium">Edit</span>
+                            </a>
+                            <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-trash-alt"></i>
+                                <span class="font-medium">Delete</span>
+                            </a>
+                            <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
+                                <i class="fas fa-paper-plane"></i>
+                                <span class="font-medium">Submit review</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-        </div>
-        {% endif%}
-        {% endfor %}
+            {% else %}
+            <h1 class="text-center text-gray-600 mt-4">No rejected courses available.</h1>
+            {% endif %}
+        </section>
     </div>
-</section>
-
-    
-
 
     <!-- Footer Section -->
     <footer class="bg-[#77390c] shadow-md">
@@ -268,6 +244,6 @@
             <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
         </div>
     </footer>
-   
+
 </body>
 </html>
