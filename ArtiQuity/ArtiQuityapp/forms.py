@@ -57,7 +57,7 @@ class CourseCreationForm(forms.ModelForm):
 class LessonCreationForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['title', 'video_url', 'content']
+        fields = ['title', 'video_file', 'content']
 
 
 

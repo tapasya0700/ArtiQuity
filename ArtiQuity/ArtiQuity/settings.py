@@ -175,5 +175,3 @@ STRIPE_SECRET_KEY = 'sk_test_51Q8yQuCsSwr3GFEeRbU3ibVmF9D9HfH6lq7hzpHBCFt12WVvfB
 
 
 
-
-
