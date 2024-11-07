@@ -86,7 +86,8 @@ def student_dashboard(request):
     if request.user.role != 'student':
         messages.error(request, "Access denied! Only instructors can access this page.")
         return redirect('home')
-
+    
+    
     # Get courses created by the instructor
     print("hello")
     courses = Course.objects.all()
@@ -94,9 +95,11 @@ def student_dashboard(request):
     if search_query:
         courses = courses.filter(title__icontains=search_query)
     print(courses)
-
-
-    return render(request, 'ArtiQuityapp/student_dashboard.html', {'courses': courses})
+    for course in courses:
+        avg_rating = course.reviews.aggregate(Avg('rating'))['rating__avg'] or 0  # Defaults to 0 if no reviews
+        course.average_rating = round(avg_rating, 1) 
+    star_range = [0, 1, 2, 3, 4]
+    return render(request, 'ArtiQuityapp/student_dashboard.html', {'courses': courses, 'star_range': star_range})
 
 
 @login_required
@@ -517,41 +520,68 @@ from .models import Course, Lesson, Enrollment, Progress
 from django.shortcuts import render, get_object_or_404
 from .models import Course, Lesson, Enrollment, Progress
 
+# views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Course, Lesson, Enrollment, Progress, Review
+from .forms import ReviewForm
+from django.contrib import messages
+# views.py
+from django.db.models import Avg
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Course, Lesson, Enrollment, Progress, Review
+from .forms import ReviewForm
+from django.contrib import messages
+
 def course_detail_view(request, course_id):
     role = request.user.role
     user_id = request.user.id
     visibility = False
 
-    # Get the course object
     course = get_object_or_404(Course, id=course_id)
-
-    # Check if the user is enrolled in the course
-    enrolled = Enrollment.objects.filter(course_id=course.id, student_id=user_id).first()
+    enrolled = Enrollment.objects.filter(course_id=course.id, student_id=user_id).exists()
     if enrolled:
         visibility = True
 
-    # Retrieve all lessons for the course and annotate each with completion status
+    # Calculate course progress percentage
     lessons = course.lessons.all()
     completed_count = 0
-    total_lessons = lessons.count()
-
     for lesson in lessons:
-        # Check if there is a progress entry for the lesson and student
-        progress = Progress.objects.filter(student_id=user_id, lesson=lesson).first()
-        lesson.is_completed = progress.is_completed if progress else False
+        # Check if each lesson is completed by the student
+        lesson.is_completed = Progress.objects.filter(student_id=user_id, lesson=lesson, is_completed=True).exists()
         if lesson.is_completed:
             completed_count += 1
 
-    # Calculate progress percentage
-    progress_percentage = (completed_count / total_lessons) * 100 if total_lessons > 0 else 0
+    progress_percentage = (completed_count / lessons.count()) * 100 if lessons.exists() else 0
 
-    # Prepare context with course, lessons, user role, visibility, and progress
+    # Handle review submission
+    if request.method == 'POST' and 'submit_review' in request.POST:
+        review_form = ReviewForm(request.POST)
+        if review_form.is_valid():
+            review = review_form.save(commit=False)
+            review.student = request.user
+            review.course = course
+            review.save()
+            messages.success(request, 'Thank you for your review!')
+            return redirect('course_detail', course_id=course_id)
+    else:
+        review_form = ReviewForm()
+
+    # Get existing reviews and calculate average rating
+    reviews = course.reviews.all()
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0  # Defaults to 0 if no reviews
+    course.average_rating = round(avg_rating, 1)
+    star_range = [0, 1, 2, 3, 4]
+
     context = {
         'course': course,
         'lessons': lessons,
         'role': role,
         'visibility': visibility,
-        'progress_percentage': progress_percentage
+        'progress_percentage': progress_percentage,
+        'review_form': review_form,
+        'reviews': reviews,
+        'average_rating': course.average_rating,
+        'star_range': star_range,
     }
     return render(request, 'ArtiQuityapp/course_detail.html', context)
 
@@ -787,43 +817,30 @@ def process_payment(request):
 
     # If the request is GET, show the checkout page
     return render(request, 'ArtiQuityapp/checkout.html')
+from django.db.models import Avg
+from django.shortcuts import render
+from .models import Enrollment, Course
 
 def enrolled_courses(request):
-    enrolls=None
-    en_course=[]
-    try:
-        enrolls=Enrollment.objects.filter(student_id=request.user)
-    except:
-        pass
-    if enrolls:
-           
-            
-            print(enrolls)
-            for e in enrolls:
-                en_course.append(Course.objects.filter(id=e.course_id).first())
-                print(e.id)
-                print(e.student_id)
-                print(e.course_id)
-            print(en_course)
-            print(en_course[0].id)
-        
-        
-            search_query = request.GET.get('search', '')
-            if search_query:
-                en_course_search=[]
-                for e in en_course:
-                    search_course = Course.objects.filter(title__icontains=search_query,id=e.id)
-                    print(search_course)
-                    if search_course:
-                        en_course_search.append(search_course.first())
-                        print(en_course_search)
+    enrolls = Enrollment.objects.filter(student_id=request.user.id)
+    en_course = []
 
-                
-                return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course_search}) 
-            else:
-                return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course })
-    else:
-            return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course})
+    for enrollment in enrolls:
+        course = Course.objects.filter(id=enrollment.course_id).first()
+        
+        if course:
+            # Calculate the average rating for each course
+            avg_rating = course.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+            course.average_rating = round(avg_rating, 1)
+            en_course.append(course)
+
+    # Handle search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        en_course = [course for course in en_course if search_query.lower() in course.title.lower()]
+
+    return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course, 'search_query': search_query})
+
   
 
     

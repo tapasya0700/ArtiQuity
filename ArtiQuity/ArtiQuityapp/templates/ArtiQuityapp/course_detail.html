@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <script>
         function markLessonCompleted(lessonId) {
             fetch("{% url 'mark_lesson_complete' %}", {
@@ -85,83 +87,151 @@
             </div>
             {% endif %}
             
+<!-- Reviews Section -->
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-semibold text-[#5a3220] mb-4">Course Reviews</h2>
+    <div class="flex items-center mb-4">
+        <h3 class="text-2xl font-semibold text-[#5a3220] mr-4">Course Rating:</h3>
 
-           
-            {% if lessons %}
-            <div class="space-y-6">
-                {% for lesson in lessons %}
-                    <div class="bg-[#f2e4db] p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 border-l-4 border-[#77390c]">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <h3 class="text-lg font-semibold text-[#5a3220]">{{ lesson.title }}</h3>
-                                {% if role == 'instructor' %}
-                                    <div class="flex items-center space-x-3">
-                                        <a href="{% url 'edit_lesson' lesson.id %}" class="text-[#e1b12c] hover:text-[#fbc531] transition duration-300" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'delete_lesson' lesson.id %}" class="text-[#d63031] hover:text-[#c0392b] transition duration-300" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            {% if role == 'student' %}
-                                <span id="lesson-status-{{ lesson.id }}">
-                                    {% if lesson.is_completed %}
-                                        <i class="fas fa-check-circle text-green-600"></i>
-                                    {% else %}
-                                        <i class="fas fa-times-circle text-red-600"></i>
-                                    {% endif %}
-                                </span>
-                            {% endif %}
-                        </div>
-                        <p class="text-[#7a5230] mt-2">{{ lesson.content }}</p>
-
-                        {% if role == 'instructor' %}
-                            {% if lesson.video_file %}
-                            <div>
-                                <div class="flex">
-                                    <video controls class="w-1/2 md:w-1/3 rounded-md shadow-sm" style="max-height: 250px;">
-                                        <source src="{{ lesson.video_file.url }}" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </div>
-                            </div>
-                            {% endif %}
-                        {% endif %}
-
-                        {% if role == 'student' %}
-                            {% if visibility %}
-                                {% if lesson.video_file %}
-                                    <div>
-                                        <video 
-                                            id="video-{{ lesson.id }}" 
-                                            controls 
-                                            class="w-1/2 md:w-1/3 rounded-md shadow-sm" 
-                                            style="max-height: 250px;"
-                                            onended="markLessonCompleted({{ lesson.id }})">
-                                            <source src="{{ lesson.video_file.url }}" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </div>
-                                {% endif %}
-                            {% else %}
-                                <video 
-                                    controls 
-                                    class="w-1/2 md:w-1/3 rounded-md shadow-sm" 
-                                    style="max-height: 250px;" 
-                                    onplay="this.pause(); alert('Please enroll in the course first');">
-                                    <source src="{{ lesson.video_file.url }}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                            {% endif %}
-                        {% endif %}
-                    </div>
+        <div class="flex items-center mb-2">
+            <span class="text-lg font-bold mr-2">Rating:</span>
+            <div class="flex items-center">
+                {% for i in star_range %}
+                    {% if course.average_rating >= i|add:"1" %}
+                        <i class="fas fa-star text-yellow-400"></i> <!-- Full star -->
+                    {% elif course.average_rating >= i|add:"0.5" %}
+                        <i class="fas fa-star-half-alt text-yellow-400"></i> <!-- Half star -->
+                    {% else %}
+                        <i class="far fa-star text-yellow-400"></i> <!-- Empty star -->
+                    {% endif %}
                 {% endfor %}
+                <span class="text-gray-600 ml-2">({{ course.average_rating }}/5)</span>
             </div>
-            {% else %}
-                <p class="text-[#d63031]">No lessons available for this course yet.</p>
+        </div>
+        </div>
+
+    
+    <!-- Display existing reviews -->
+    <div class="space-y-6">
+        {% for review in reviews %}
+        <div class="p-4 rounded-lg shadow-md bg-gray-100">
+            <div class="flex justify-between items-center">
+                <h4 class="text-lg font-bold">{{ review.student.username }}</h4>
+                
+                <div class="flex items-center mb-2">
+                    
+                    <div class="flex items-center">
+                        {% for i in star_range %}
+                            {% if review.rating >= i|add:"1" %}
+                                <i class="fas fa-star text-yellow-400"></i> <!-- Full star -->
+                            {% elif review.rating >= i|add:"0.5" %}
+                                <i class="fas fa-star-half-alt text-yellow-400"></i> <!-- Half star -->
+                            {% else %}
+                                <i class="far fa-star text-yellow-400"></i> <!-- Empty star -->
+                            {% endif %}
+                        {% endfor %}
+                        <span class="text-gray-600 ml-2">({{ review.rating }}/5)</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-gray-700 mt-2">{{ review.comment }}</p>
+            <p class="text-gray-500 text-sm">{{ review.review_date|date:"F j, Y" }}</p>
+        </div>
+        {% empty %}
+        <p class="text-gray-500">No reviews yet. Be the first to review this course!</p>
+        {% endfor %}
+    </div>
+
+    <!-- Add a Review Form -->
+    {% if role == 'student' and visibility %}
+    <div class="mt-8">
+        <h3 class="text-2xl font-semibold text-[#5a3220]">Leave a Review</h3>
+        <form method="post" class="mt-4 bg-white p-4 rounded-lg shadow-md">
+            {% csrf_token %}
+            {{ review_form.as_p }}
+            <button type="submit" name="submit_review" class="px-4 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700">
+                Submit Review
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+           
+{% if lessons %}
+<div class="space-y-6">
+    {% for lesson in lessons %}
+        <div class="bg-[#f2e4db] p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 border-l-4 border-[#77390c]">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-lg font-semibold text-[#5a3220]">{{ lesson.title }}</h3>
+                    {% if role == 'instructor' %}
+                        <div class="flex items-center space-x-3">
+                            <a href="{% url 'edit_lesson' lesson.id %}" class="text-[#e1b12c] hover:text-[#fbc531] transition duration-300" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'delete_lesson' lesson.id %}" class="text-[#d63031] hover:text-[#c0392b] transition duration-300" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if role == 'student' %}
+                    <span id="lesson-status-{{ lesson.id }}">
+                        {% if lesson.is_completed %}
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle text-red-600"></i>
+                        {% endif %}
+                    </span>
+                {% endif %}
+            </div>
+            <p class="text-[#7a5230] mt-2">{{ lesson.content }}</p>
+
+            {% if role == 'instructor' %}
+                {% if lesson.video_file %}
+                <div>
+                    <div class="flex">
+                        <video controls class="w-1/2 md:w-1/3 rounded-md shadow-sm" style="max-height: 250px;">
+                            <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+                {% endif %}
             {% endif %}
+
+            {% if role == 'student' %}
+                {% if visibility %}
+                    {% if lesson.video_file %}
+                        <div>
+                            <video 
+                                id="video-{{ lesson.id }}" 
+                                controls 
+                                class="w-1/2 md:w-1/3 rounded-md shadow-sm" 
+                                style="max-height: 250px;"
+                                onended="markLessonCompleted({{ lesson.id }})">
+                                <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <video 
+                        controls 
+                        class="w-1/2 md:w-1/3 rounded-md shadow-sm" 
+                        style="max-height: 250px;" 
+                        onplay="this.pause(); alert('Please enroll in the course first');">
+                        <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+    <p class="text-[#d63031]">No lessons available for this course yet.</p>
+{% endif %}
 
             {% if role == 'instructor' %}
             <div class="mt-10 text-center flex justify-center space-x-8">
