@@ -87,7 +87,17 @@ class Lesson(models.Model):
         return self.title
 
 
-# 4. Enrollments Table
+class Progress(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lesson_progress')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='progress')
+    is_completed = models.BooleanField(default=False)
+    completion_date = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.student.username} - {self.lesson.title} - Completed: {self.is_completed}'
+
+
+# 5. Enrollments Table
 class Enrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
@@ -95,8 +105,16 @@ class Enrollment(models.Model):
     enrolled_at = models.DateTimeField(auto_now_add=True)
     last_accessed = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self):
         return f'{self.student.username} enrolled in {self.course.title}'
+
+    def update_course_progress(self):
+        total_lessons = self.course.lessons.count()
+        completed_lessons = Progress.objects.filter(student=self.student, lesson__course=self.course, is_completed=True).count()
+        if total_lessons > 0:
+            self.progress = (completed_lessons / total_lessons) * 100
+            self.save()
+
 
 
 # 5. Payments Table
