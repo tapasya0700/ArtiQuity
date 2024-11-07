@@ -23,7 +23,7 @@ urlpatterns = [
       path('instructor/send-for-approval/<int:course_id>/', views.send_course_for_approval, name='send_course_for_approval'),
          path('admin/course/approve/<int:course_id>/', views.approve_course, name='approve_course'),
     path('admin/course/reject/<int:course_id>/', views.reject_course, name='reject_course'),
-    path('course/<int:course_id>/', views.course_detail_view, name='course_detail'),
+     path('course/<int:course_id>/<int:lesson_id>/', views.course_detail_view, name='course_detail'),
     path('/reset_password/',views.reset_password, name='reset_password'),
      path('/forgot_password/',views.forgot_password, name='forgot_password'),
 

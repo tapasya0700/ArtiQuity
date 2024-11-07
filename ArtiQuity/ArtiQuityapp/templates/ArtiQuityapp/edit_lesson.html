@@ -145,7 +145,7 @@
                     </button>
                 
                     <!-- Cancel Button -->
-                    <a href="{% url 'course_detail' lesson.course.id %}" class="bg-red-600 text-white px-10 py-3 rounded-md hover:bg-[#e63946] shadow-md hover:shadow-lg transition duration-300 flex items-center space-x-2">
+                    <a href="{% url 'course_detail' lesson.course.id lesson.id|default:0 %}" class="bg-red-600 text-white px-10 py-3 rounded-md hover:bg-[#e63946] shadow-md hover:shadow-lg transition duration-300 flex items-center space-x-2">
                         <i class="fas fa-times-circle"></i> <!-- Cancel Icon -->
                         <span>Cancel</span>
                     </a>
