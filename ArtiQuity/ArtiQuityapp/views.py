@@ -1,4 +1,5 @@
 
+import json
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
@@ -510,35 +511,50 @@ def reject_course(request, course_id):
     
     return redirect('admin_dashboard')
 
-def course_detail_view(request, course_id):
-    role=request.user.role
-    id=request.user.id
-    print(role)
-    visibility=False
-    enrolled=[]
-    
-    course = get_object_or_404(Course, id=course_id)
-    print(course)
-    
-    try: 
-        enrolled = Enrollment.objects.get(course_id=course.id,student_id=id)
-        print(enrolled)
-        if enrolled:
-            visibility=True
-            print(visibility)
+from django.shortcuts import render, get_object_or_404
+from .models import Course, Lesson, Enrollment, Progress
 
-    except:
-        pass
-    
-    lessons = course.lessons.all()  # Retrieve all lessons for the course
+from django.shortcuts import render, get_object_or_404
+from .models import Course, Lesson, Enrollment, Progress
+
+def course_detail_view(request, course_id):
+    role = request.user.role
+    user_id = request.user.id
+    visibility = False
+
+    # Get the course object
+    course = get_object_or_404(Course, id=course_id)
+
+    # Check if the user is enrolled in the course
+    enrolled = Enrollment.objects.filter(course_id=course.id, student_id=user_id).first()
+    if enrolled:
+        visibility = True
+
+    # Retrieve all lessons for the course and annotate each with completion status
+    lessons = course.lessons.all()
+    completed_count = 0
+    total_lessons = lessons.count()
+
+    for lesson in lessons:
+        # Check if there is a progress entry for the lesson and student
+        progress = Progress.objects.filter(student_id=user_id, lesson=lesson).first()
+        lesson.is_completed = progress.is_completed if progress else False
+        if lesson.is_completed:
+            completed_count += 1
+
+    # Calculate progress percentage
+    progress_percentage = (completed_count / total_lessons) * 100 if total_lessons > 0 else 0
+
+    # Prepare context with course, lessons, user role, visibility, and progress
     context = {
         'course': course,
         'lessons': lessons,
-        'role':role,
-        'visibility':visibility
-
+        'role': role,
+        'visibility': visibility,
+        'progress_percentage': progress_percentage
     }
     return render(request, 'ArtiQuityapp/course_detail.html', context)
+
 
 def forgot_password(request):
     if request.method == 'POST':
@@ -811,4 +827,37 @@ def enrolled_courses(request):
   
 
     
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Lesson, Progress
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Lesson, Enrollment, Progress
+import json
+
+@csrf_exempt
+def mark_lesson_complete(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        data = json.loads(request.body)
+        lesson_id = data.get('lesson_id')
+        
+        try:
+            # Check if the lesson exists
+            lesson = Lesson.objects.get(id=lesson_id)
+
+            # Check if the user is enrolled in the course
+            if Enrollment.objects.filter(student=request.user, course=lesson.course).exists():
+                # Update or create the progress entry for the lesson
+                progress, created = Progress.objects.get_or_create(student=request.user, lesson=lesson)
+                progress.is_completed = True
+                progress.save()
+                
+                return JsonResponse({'status': 'success', 'message': 'Lesson marked as completed.'})
+
+            else:
+                return JsonResponse({'status': 'failed', 'message': 'User is not enrolled in this course.'}, status=403)
+        
+        except Lesson.DoesNotExist:
+            return JsonResponse({'status': 'failed', 'message': 'Lesson not found.'}, status=404)
     
+    return JsonResponse({'status': 'failed', 'message': 'Invalid request.'}, status=400)
