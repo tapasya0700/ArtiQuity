@@ -48,6 +48,9 @@ def custom_authenticate(username, password):
         return None
     return None
 @login_required
+
+
+@login_required
 def instructor_dashboard(request):
     # Debug information for the logged-in user
     print(f"User logged in: {request.user.username}")  # Print the logged-in user
@@ -59,9 +62,17 @@ def instructor_dashboard(request):
         return redirect('home')
 
     # Retrieve all courses created by the instructor
+    course_data = []
     all_courses = Course.objects.filter(instructor=request.user)
     approved_courses = all_courses.filter(status='approved')
     rejected_courses = all_courses.filter(status='rejected')
+    
+    for course in all_courses:
+        first_lesson = course.lessons.first()  # Get the first lesson, if it exists
+        course_data.append({
+            'course': course,
+            'first_lesson_id': first_lesson.id if first_lesson else None,
+        })
 
     # Apply search filter if a query is provided
     search_query = request.GET.get('search', '')
@@ -75,31 +86,48 @@ def instructor_dashboard(request):
         'all_courses': all_courses,
         'approved_courses': approved_courses,
         'rejected_courses': rejected_courses,
-        'search_query': search_query  # Pass the search query to maintain it in the template if needed
+        'search_query': search_query,  # Pass the search query to maintain it in the template if needed
+        'course_data': course_data,
     })
 
-@login_required
-def student_dashboard(request):
 
+@login_required
+
+
+def student_dashboard(request):
+    # Verify if the user is a student
     print(f"User logged in: {request.user.username}")  # Print the logged-in user
     print(f"User role: {request.user.role}")
     if request.user.role != 'student':
-        messages.error(request, "Access denied! Only instructors can access this page.")
+        messages.error(request, "Access denied! Only students can access this page.")
         return redirect('home')
     
-    
-    # Get courses created by the instructor
-    print("hello")
+    # Retrieve all courses or filter by search query
     courses = Course.objects.all()
     search_query = request.GET.get('search', '')
     if search_query:
         courses = courses.filter(title__icontains=search_query)
-    print(courses)
+
+    # Process each course to calculate average rating and get the first lesson ID
+    course_data = []
     for course in courses:
-        avg_rating = course.reviews.aggregate(Avg('rating'))['rating__avg'] or 0  # Defaults to 0 if no reviews
-        course.average_rating = round(avg_rating, 1) 
-    star_range = [0, 1, 2, 3, 4]
-    return render(request, 'ArtiQuityapp/student_dashboard.html', {'courses': courses, 'star_range': star_range})
+        avg_rating = course.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        course.average_rating = round(avg_rating, 1)
+        first_lesson = course.lessons.first()  # Get the first lesson, if it exists
+
+        course_data.append({
+            'course': course,
+            'first_lesson_id': first_lesson.id if first_lesson else None,
+            'average_rating': course.average_rating,
+        })
+
+    star_range = range(5)  # For star display in the template
+
+    # Render the student dashboard template with course data
+    return render(request, 'ArtiQuityapp/student_dashboard.html', {
+        'course_data': course_data,
+        'star_range': star_range,
+    })
 
 
 @login_required
@@ -136,7 +164,7 @@ def create_lesson(request, course_id):
             lesson.course = course
             lesson.save()
             messages.success(request, 'Lesson added successfully!')
-            return redirect('course_detail', course_id=lesson.course_id)
+            return redirect('course_detail', course_id=lesson.course_id,lesson_id=lesson.id)
     else:
         form = LessonCreationForm()
     
@@ -430,7 +458,7 @@ def edit_lesson(request, lesson_id):
             
             form.save()  # Save the form to update the database
             messages.success(request, 'Lesson updated successfully!')
-            return redirect('course_detail', lesson.course_id)
+            return redirect('course_detail', lesson.course_id, lesson.id)
     else:
         form = LessonCreationForm(instance=lesson)
     
@@ -444,7 +472,7 @@ def edit_lesson(request, lesson_id):
 def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, course__instructor=request.user)
     video_path = lesson.video_file.path if lesson.video_file else None  # Get the path of the video file
-
+    left_lessons=Lesson.objects.filter(course_id=lesson.course_id)
     if request.method == 'POST':
         # Remove the video file if it exists
         if video_path and os.path.isfile(video_path):
@@ -452,7 +480,10 @@ def delete_lesson(request, lesson_id):
         
         lesson.delete()  # Delete the lesson from the database
         messages.success(request, 'Lesson deleted successfully!')
-        return redirect('course_detail', lesson.course_id)  # Ensure 'course_detail' is the correct view name
+        
+        
+        return redirect('course_detail', lesson.course_id, left_lessons[0].id if left_lessons else 0)
+       
     
     return render(request, 'ArtiQuityapp/lesson_delete.html', {'lesson': lesson})
 
@@ -532,25 +563,44 @@ from .models import Course, Lesson, Enrollment, Progress, Review
 from .forms import ReviewForm
 from django.contrib import messages
 
-def course_detail_view(request, course_id):
+from django.shortcuts import get_object_or_404, redirect
+from django.db.models import Avg
+from django.contrib import messages
+
+from django.shortcuts import get_object_or_404, redirect
+from django.db.models import Avg
+from django.contrib import messages
+
+def course_detail_view(request, course_id, lesson_id=None):
     role = request.user.role
     user_id = request.user.id
     visibility = False
 
+    # Get the course and check if the user is enrolled
     course = get_object_or_404(Course, id=course_id)
     enrolled = Enrollment.objects.filter(course_id=course.id, student_id=user_id).exists()
     if enrolled:
         visibility = True
 
-    # Calculate course progress percentage
+    # Retrieve all lessons for the course
     lessons = course.lessons.all()
+    
+    # Determine the selected lesson; if lesson_id is not provided, use the first lesson
+    selected_lesson = get_object_or_404(Lesson, id=lesson_id, course=course) if lesson_id else lessons.first()
+    
+    # Mark lesson as completed if the form is submitted
+    if request.method == 'POST' and 'complete_lesson' in request.POST:
+        Progress.objects.update_or_create(student_id=user_id, lesson=selected_lesson, defaults={'is_completed': True})
+        messages.success(request, 'Lesson marked as completed!')
+        return redirect('course_detail', course_id=course.id, lesson_id=selected_lesson.id)
+
+    # Calculate course progress percentage
     completed_count = 0
     for lesson in lessons:
         # Check if each lesson is completed by the student
         lesson.is_completed = Progress.objects.filter(student_id=user_id, lesson=lesson, is_completed=True).exists()
         if lesson.is_completed:
             completed_count += 1
-
     progress_percentage = (completed_count / lessons.count()) * 100 if lessons.exists() else 0
 
     # Handle review submission
@@ -562,7 +612,7 @@ def course_detail_view(request, course_id):
             review.course = course
             review.save()
             messages.success(request, 'Thank you for your review!')
-            return redirect('course_detail', course_id=course_id)
+            return redirect('course_detail', course_id=course_id, lesson_id=selected_lesson.id)
     else:
         review_form = ReviewForm()
 
@@ -570,11 +620,12 @@ def course_detail_view(request, course_id):
     reviews = course.reviews.all()
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0  # Defaults to 0 if no reviews
     course.average_rating = round(avg_rating, 1)
-    star_range = [0, 1, 2, 3, 4]
+    star_range = range(5)
 
     context = {
         'course': course,
         'lessons': lessons,
+        'selected_lesson': selected_lesson,
         'role': role,
         'visibility': visibility,
         'progress_percentage': progress_percentage,
@@ -832,17 +883,30 @@ def enrolled_courses(request):
             # Calculate the average rating for each course
             avg_rating = course.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
             course.average_rating = round(avg_rating, 1)
-            en_course.append(course)
+            
+            # Retrieve the first lesson ID if available
+            first_lesson = course.lessons.first()  # Get the first lesson if it exists
+            
+            # Append course data with average rating and first lesson ID
+            en_course.append({
+                'course': course,
+                'average_rating': course.average_rating,
+                'first_lesson_id': first_lesson.id if first_lesson else None,
+            })
 
     # Handle search
     search_query = request.GET.get('search', '')
     if search_query:
-        en_course = [course for course in en_course if search_query.lower() in course.title.lower()]
+        en_course = [
+            course_info for course_info in en_course
+            if search_query.lower() in course_info['course'].title.lower()
+        ]
 
-    return render(request, 'ArtiQuityapp/enrolled_courses.html', {'en_course': en_course, 'search_query': search_query})
-
-  
-
+    return render(request, 'ArtiQuityapp/enrolled_courses.html', {
+        'en_course': en_course,
+        'search_query': search_query,
+        'star_range': range(5),  # For star display in the template
+    })
     
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt

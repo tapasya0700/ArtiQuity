@@ -115,37 +115,41 @@
             <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">All Courses</h2>
             {% if all_courses %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course in all_courses %}
+                {% for course in course_data %}
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.course.thumbnail %}{{ course.course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
                     <div class="p-4">
-                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
-                        <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
-                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
-                        {% if course.status == 'rejected'%}
-                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.rejection_reason }}</p>
+                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.course.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-4">${{ course.course.price }}</p>
+                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.course.status }}</span></p>
+                        {% if course.course.status == 'rejected'%}
+                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.course.rejection_reason }}</p>
                         {%endif%}
                         <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
-                            <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                           
+                            <a href="{% url 'course_detail' course.course.id course.first_lesson_id|default:0 %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-eye"></i>
                                 <span class="font-medium">View</span>
                             </a>
-                            <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                    
+
+                           
+                            <a href="{% url 'edit_course' course.course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-edit"></i>
                                 <span class="font-medium">Edit</span>
                             </a>
-                            <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'delete_course' course.course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-trash-alt"></i>
                                 <span class="font-medium">Delete</span>
                             </a>
-                            {%if course.status == 'draft'%}
-                            <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
+                            {%if course.course.status == 'draft'%}
+                            <a href="{% url 'send_course_for_approval' course.course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-paper-plane"></i>
                                 <span class="font-medium">Submit review</span>
                             </a>
                             {%endif%}
-                            {%if course.status == 'rejected'%}
-                            <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
+                            {%if course.course.status == 'rejected'%}
+                            <a href="{% url 'send_course_for_approval' course.course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-paper-plane"></i>
                                 <span class="font-medium">Submit review</span>
                             </a>
@@ -165,23 +169,26 @@
             <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Approved Courses</h2>
             {% if approved_courses %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course in approved_courses %}
+                {% for course in course_data %}
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.course.thumbnail %}{{ course.course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
                     <div class="p-4">
-                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
-                        <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
-                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
+                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.course.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-4">${{ course.course.price }}</p>
+                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.course.status }}</span></p>
+                        {% if course.course.status == 'rejected'%}
+                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.course.rejection_reason }}</p>
+                        {%endif%}
                         <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
-                            <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'course_detail' course.course.id course.first_lesson_id|default:0 %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-eye"></i>
                                 <span class="font-medium">View</span>
                             </a>
-                            <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'edit_course' course.course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-edit"></i>
                                 <span class="font-medium">Edit</span>
                             </a>
-                            <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'delete_course' course.course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-trash-alt"></i>
                                 <span class="font-medium">Delete</span>
                             </a>
@@ -200,28 +207,30 @@
             <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Rejected Courses</h2>
             {% if rejected_courses %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course in rejected_courses %}
+                {% for course in course_data %}
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.course.thumbnail %}{{ course.course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
                     <div class="p-4">
-                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.title }}</h3>
-                        <p class="text-sm text-gray-600 mb-4">${{ course.price }}</p>
-                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.status }}</span></p>
-                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.rejection_reason }}</p>
+                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.course.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-4">${{ course.course.price }}</p>
+                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.course.status }}</span></p>
+                        {% if course.course.status == 'rejected'%}
+                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.course.rejection_reason }}</p>
+                        {%endif%}
                         <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
-                            <a href="{% url 'course_detail' course.id %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'course_detail' course.course.id course.first_lesson_id|default:0 %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-eye"></i>
                                 <span class="font-medium">View</span>
                             </a>
-                            <a href="{% url 'edit_course' course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'edit_course' course.course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-edit"></i>
                                 <span class="font-medium">Edit</span>
                             </a>
-                            <a href="{% url 'delete_course' course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'delete_course' course.course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-trash-alt"></i>
                                 <span class="font-medium">Delete</span>
                             </a>
-                            <a href="{% url 'send_course_for_approval' course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
+                            <a href="{% url 'send_course_for_approval' course.course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
                                 <i class="fas fa-paper-plane"></i>
                                 <span class="font-medium">Submit review</span>
                             </a>
