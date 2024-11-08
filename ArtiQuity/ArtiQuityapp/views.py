@@ -67,12 +67,7 @@ def instructor_dashboard(request):
     approved_courses = all_courses.filter(status='approved')
     rejected_courses = all_courses.filter(status='rejected')
     
-    for course in all_courses:
-        first_lesson = course.lessons.first()  # Get the first lesson, if it exists
-        course_data.append({
-            'course': course,
-            'first_lesson_id': first_lesson.id if first_lesson else None,
-        })
+    
 
     # Apply search filter if a query is provided
     search_query = request.GET.get('search', '')
@@ -80,6 +75,13 @@ def instructor_dashboard(request):
         all_courses = all_courses.filter(title__icontains=search_query)
         approved_courses = approved_courses.filter(title__icontains=search_query)
         rejected_courses = rejected_courses.filter(title__icontains=search_query)
+    for course in all_courses:
+        first_lesson = course.lessons.first()  # Get the first lesson, if it exists
+        course_data.append({
+            'course': course,
+            'first_lesson_id': first_lesson.id if first_lesson else None,
+        })  
+
 
     # Render the dashboard template with the filtered courses
     return render(request, 'ArtiQuityapp/instructor_dashboard.html', {
