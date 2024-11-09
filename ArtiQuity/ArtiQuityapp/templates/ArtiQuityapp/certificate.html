@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate of Completion</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* General styling */
+        body {
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .certificate {
+            max-width: 800px;
+            background-color: #fff;
+            border: none;
+            padding: 40px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: auto;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #4c51bf;
+            font-weight: bold;
+        }
+
+        .recipient {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-top: 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #2d3748;
+            font-weight: normal;
+            margin: 1rem 0;
+        }
+
+        .details {
+            margin-top: 2rem;
+            font-size: 1.25rem;
+            color: #718096;
+        }
+
+        .footer {
+            font-size: 1rem;
+            color: #a0aec0;
+            margin-top: 3rem;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: none;
+            }
+            .certificate {
+                border: none;
+                padding: 20px;
+                margin: 0;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <h1>Certificate of Completion</h1>
+        <p class="text-gray-700 text-lg mb-6">This certificate is proudly presented to</p>
+        
+        <p class="recipient">{{ enrollment.student.username }}</p>
+        
+        <h3>for successfully completing the course</h3>
+        
+        <p class="recipient">{{ enrollment.course.title }}</p>
+        
+        <div class="details">
+            <p>Issued on: {{ enrollment.certificates.first.issued_date|date:"F j, Y" }}</p>
+        </div>
+        
+        <div class="footer">
+            <p>ArtiQuity - Empowering Artistic Learning</p>
+        
+        </div>
+        <div>
+        <button onclick="window.print()" class="no-print bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Download Certificate</button>
+    </div>
+</div>
+ 
+</body>
+</html>

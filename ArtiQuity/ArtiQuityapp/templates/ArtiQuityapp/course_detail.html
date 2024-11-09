@@ -161,6 +161,20 @@
                 </div>
             </div>
             {% endif %}
+            {% if progress_percentage == 100 %}
+            <div class="mt-4 text-center">
+                <h3 class="text-xl font-semibold text-green-600">Congratulations! You’ve completed the course.</h3>
+                <a href="{% url 'certificate_view' enrollment.id %}"  class= "hover:underline ">
+                    View Certificate
+                </a>
+                &nbsp;
+                <a href="{% url 'download_certificate_as_pdf' enrollment.id %}" class= "hover:underline ">
+                    Download Certificate
+                </a>
+
+            </div>
+        {% endif %}
+        
 
             
                 

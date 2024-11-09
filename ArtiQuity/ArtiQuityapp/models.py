@@ -86,7 +86,7 @@ class Lesson(models.Model):
     def __str__(self):
         return self.title
 
-
+# 4 Progress table
 class Progress(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lesson_progress')
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='progress')
@@ -175,7 +175,7 @@ class Certificate(models.Model):
     def _str_(self):
         return f'Certificate for {self.enrollment.course.title} - {self.enrollment.student.username}'
     
-# Cart Table 
+#  10 Cart Table 
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')

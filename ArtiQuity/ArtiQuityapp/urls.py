@@ -34,5 +34,9 @@ urlpatterns = [
     path('process_payment/', views.process_payment, name='process_payment'),
      path('enrolled_courses/', views.enrolled_courses, name='enrolled_courses'),
       path('mark_lesson_complete/', views.mark_lesson_complete, name='mark_lesson_complete'),
+      
+    path('download_certificate/<int:enrollment_id>/', views.download_certificate_as_pdf, name='download_certificate_as_pdf'),
+
+       path('certificate/<int:enrollment_id>/', views.generate_certificate_view, name='certificate_view'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
