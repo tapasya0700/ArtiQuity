@@ -24,6 +24,24 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.db import IntegrityError
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Course, Lesson, Enrollment, Progress, Review,Certificate
+from .forms import ReviewForm
+from django.contrib import messages
+# views.py
+from django.db.models import Avg
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Course, Lesson, Enrollment, Progress, Review
+from .forms import ReviewForm
+from django.contrib import messages
+
+from django.shortcuts import get_object_or_404, redirect
+from django.db.models import Avg
+from django.contrib import messages
+
+from django.shortcuts import get_object_or_404, redirect
+from django.db.models import Avg
+from django.contrib import messages
 # Create your views here.
 def home(request):
     if(request.user):
@@ -554,24 +572,7 @@ from django.shortcuts import render, get_object_or_404
 from .models import Course, Lesson, Enrollment, Progress
 
 # views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Course, Lesson, Enrollment, Progress, Review
-from .forms import ReviewForm
-from django.contrib import messages
-# views.py
-from django.db.models import Avg
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Course, Lesson, Enrollment, Progress, Review
-from .forms import ReviewForm
-from django.contrib import messages
 
-from django.shortcuts import get_object_or_404, redirect
-from django.db.models import Avg
-from django.contrib import messages
-
-from django.shortcuts import get_object_or_404, redirect
-from django.db.models import Avg
-from django.contrib import messages
 
 def course_detail_view(request, course_id, lesson_id=None):
     role = request.user.role
@@ -604,6 +605,16 @@ def course_detail_view(request, course_id, lesson_id=None):
         if lesson.is_completed:
             completed_count += 1
     progress_percentage = (completed_count / lessons.count()) * 100 if lessons.exists() else 0
+    if progress_percentage == 100:
+        enrollment = Enrollment.objects.get(course_id=course.id, student_id=user_id)
+        # Generate the certificate if it doesn't exist
+        Certificate.objects.get_or_create(
+            enrollment=enrollment,
+            defaults={
+                'certificate_url': f'/certificates/{enrollment.id}.pdf',  # Example URL
+                'issued_date': timezone.now()
+            }
+        )
 
     # Handle review submission
     if request.method == 'POST' and 'submit_review' in request.POST:
@@ -635,6 +646,7 @@ def course_detail_view(request, course_id, lesson_id=None):
         'reviews': reviews,
         'average_rating': course.average_rating,
         'star_range': star_range,
+        'enrollment':enrollment,
     }
     return render(request, 'ArtiQuityapp/course_detail.html', context)
 
@@ -871,8 +883,9 @@ def process_payment(request):
     # If the request is GET, show the checkout page
     return render(request, 'ArtiQuityapp/checkout.html')
 from django.db.models import Avg
-from django.shortcuts import render
+
 from .models import Enrollment, Course
+
 
 def enrolled_courses(request):
     enrolls = Enrollment.objects.filter(student_id=request.user.id)
@@ -944,3 +957,61 @@ def mark_lesson_complete(request):
             return JsonResponse({'status': 'failed', 'message': 'Lesson not found.'}, status=404)
     
     return JsonResponse({'status': 'failed', 'message': 'Invalid request.'}, status=400)
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.pdfgen import canvas
+from .models import Certificate, Enrollment
+from io import BytesIO
+
+def generate_certificate_view(request, enrollment_id):
+    # Fetch the enrollment and related certificate data
+    enrollment = get_object_or_404(Enrollment, id=enrollment_id)
+    certificate = enrollment.certificates.first()  # Assuming one certificate per enrollment
+
+    # Check if the user has access to this certificate
+    if request.user != enrollment.student:
+        return HttpResponse("You are not authorized to view this certificate.", status=403)
+
+    # Render the template with context
+    return render(request, 'ArtiQuityapp/certificate.html', {
+        'enrollment': enrollment,
+        'certificate': certificate,
+    })
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.shortcuts import get_object_or_404
+from .models import Enrollment
+
+def download_certificate_as_pdf(request, enrollment_id):
+    enrollment = get_object_or_404(Enrollment, id=enrollment_id)
+
+    # Fetch the template and render it with the enrollment context
+    template_path = 'ArtiQuityapp\certificate.html'# Replace with your actual template path
+    context = {
+        'enrollment': enrollment,
+        'course': enrollment.course,
+        'student': enrollment.student,
+        'issued_date': enrollment.certificates.first().issued_date,
+    }
+
+    # Render the HTML with the context
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # Create a PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="certificate_{enrollment.student.username}.pdf"'
+
+    # Use xhtml2pdf to convert HTML to PDF and write it to the response
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    
+    # Check for errors
+    if pisa_status.err:
+        return HttpResponse('We had some errors with your PDF', status=500)
+
+    return response
+
