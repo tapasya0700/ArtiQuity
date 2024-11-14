@@ -109,10 +109,68 @@
                 </button>
             </form>
         </div>
+        <div class="container mx-auto flex">
+            <aside class="w-1/4">
+            </aside>
+            <main class="w-3/4 ml-4">
+        <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">All Courses</h2>
+            </main>
+    </div>
+        <div class="container mx-auto flex">
+          <!-- Sidebar Filter Section -->
+<aside class="w-1/4 bg-gradient-to-br from-brown-100 to-beige-100 text-gray-800 p-6 shadow-lg rounded-lg">
+    <h2 class="text-2xl font-bold mb-6">Filter by Status</h2>
+    <form method="GET" action="{% url 'instructor_dashboard' %}">
+        <div class="flex flex-col space-y-4">
 
+            <label class="flex items-center cursor-pointer">
+                <input type="checkbox" name="status_filter" value="pending"
+                       {% if 'pending' in status_filters %}checked{% endif %}
+                       class="form-checkbox h-5 w-5 text-purple-600 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                <span class="ml-3 text-lg flex items-center">
+                    <i class="fas fa-clock mr-2"></i>Pending
+                </span>
+            </label>
+
+            <label class="flex items-center cursor-pointer">
+                <input type="checkbox" name="status_filter" value="approved"
+                       {% if 'approved' in status_filters %}checked{% endif %}
+                       class="form-checkbox h-5 w-5 text-green-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                <span class="ml-3 text-lg flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>Approved
+                </span>
+            </label>
+
+            <label class="flex items-center cursor-pointer">
+                <input type="checkbox" name="status_filter" value="rejected"
+                       {% if 'rejected' in status_filters %}checked{% endif %}
+                       class="form-checkbox h-5 w-5 text-red-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                <span class="ml-3 text-lg flex items-center">
+                    <i class="fas fa-times-circle mr-2"></i>Rejected
+                </span>
+            </label>
+
+            <label class="flex items-center cursor-pointer">
+                <input type="checkbox" name="status_filter" value="draft"
+                       {% if 'draft' in status_filters %}checked{% endif %}
+                       class="form-checkbox h-5 w-5 text-yellow-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                <span class="ml-3 text-lg flex items-center">
+                    <i class="fas fa-pencil-alt mr-2"></i>Draft
+                </span>
+            </label>
+        </div>
+        <button type="submit"
+                class="mt-6 w-full bg-white text-purple-600 font-semibold py-2 rounded-lg hover:bg-purple-100 transition duration-300 shadow-md hover:shadow-lg">
+            Apply Filter
+        </button>
+    </form>
+</aside>
+
+
+            <main class="w-3/4 ml-4">
         <!-- All Courses Section -->
         <section class="courses-section">
-            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">All Courses</h2>
+            
             {% if all_courses %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {% for course in course_data %}
@@ -162,101 +220,22 @@
             {% else %}
             <p class="text-center text-gray-600 mt-4">No courses available to display.</p>
             {% endif %}
-        </section>
-
-        <!-- Approved Courses Section -->
-        <section class="courses-section">
-            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Approved Courses</h2>
-            {% if approved_courses %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course in course_data %}
-                {% if course.course.status == 'approved'%}
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.course.thumbnail %}{{ course.course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
-                    <div class="p-4">
-                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.course.title }}</h3>
-                        <p class="text-sm text-gray-600 mb-4">${{ course.course.price }}</p>
-                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.course.status }}</span></p>
-                        {% if course.course.status == 'rejected'%}
-                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.course.rejection_reason }}</p>
-                        {%endif%}
-                        <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
-                            <a href="{% url 'course_detail' course.course.id course.first_lesson_id|default:0 %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
-                                <i class="fas fa-eye"></i>
-                                <span class="font-medium">View</span>
-                            </a>
-                            <a href="{% url 'edit_course' course.course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
-                                <i class="fas fa-edit"></i>
-                                <span class="font-medium">Edit</span>
-                            </a>
-                            <a href="{% url 'delete_course' course.course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
-                                <i class="fas fa-trash-alt"></i>
-                                <span class="font-medium">Delete</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {%endif%}
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-center text-gray-600 mt-4">No approved courses available.</p>
-            {% endif %}
-        </section>
-
-        <!-- Rejected Courses Section -->
-        <section class="courses-section">
-            <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Rejected Courses</h2>
-            {% if rejected_courses %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course in course_data %}
-                {% if course.course.status == 'rejected'%}
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course.course.thumbnail %}{{ course.course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
-                    <div class="p-4">
-                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course.course.title }}</h3>
-                        <p class="text-sm text-gray-600 mb-4">${{ course.course.price }}</p>
-                        <p class="text-sm text-gray-600 mb-4">Status: <span class="font-bold capitalize">{{ course.course.status }}</span></p>
-                        {% if course.course.status == 'rejected'%}
-                        <p class="text-sm text-red-600 mb-4">Rejection Reason: {{ course.course.rejection_reason }}</p>
-                        {%endif%}
-                        <div class="flex flex-col space-y-2 md:flex-row md:space-x-4 justify-between items-center mt-4">
-                            <a href="{% url 'course_detail' course.course.id course.first_lesson_id|default:0 %}" class="flex-1 text-[#1a73e8] hover:text-[#0b59d5] transition duration-300 text-center flex items-center justify-center space-x-2">
-                                <i class="fas fa-eye"></i>
-                                <span class="font-medium">View</span>
-                            </a>
-                            <a href="{% url 'edit_course' course.course.id %}" class="flex-1 text-yellow-600 hover:text-yellow-700 transition duration-300 text-center flex items-center justify-center space-x-2">
-                                <i class="fas fa-edit"></i>
-                                <span class="font-medium">Edit</span>
-                            </a>
-                            <a href="{% url 'delete_course' course.course.id %}" class="flex-1 text-red-500 hover:text-red-600 transition duration-300 text-center flex items-center justify-center space-x-2">
-                                <i class="fas fa-trash-alt"></i>
-                                <span class="font-medium">Delete</span>
-                            </a>
-                            <a href="{% url 'send_course_for_approval' course.course.id %}" class="flex-1 text-[#4caf50] hover:text-[#3b8d40] transition duration-300 text-center flex items-center justify-center space-x-2">
-                                <i class="fas fa-paper-plane"></i>
-                                <span class="font-medium">Submit review</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {%endif%}
-                {% endfor %}
-            </div>
-            {% else %}
-            <h1 class="text-center text-gray-600 mt-4">No rejected courses available.</h1>
-            {% endif %}
-        </section>
-    </div>
-
-    <!-- Footer Section -->
-    <footer class="bg-[#77390c] shadow-md">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
-            <a href="#" class="text-white hover:text-gray-300 mx-2">Privacy Policy</a> | 
-            <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
         </div>
-    </footer>
+        </section>
+         <!-- Footer Section -->
+        <footer class="bg-[#77390c] shadow-md">
+            <div class="container mx-auto text-center">
+                <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+                <a href="#" class="text-white hover:text-gray-300 mx-2">Privacy Policy</a> | 
+                <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
+            </div>
+        </footer>
+    </div>
+    </main>
+
+   
+  
 
 </body>
+
 </html>
