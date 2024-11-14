@@ -448,7 +448,7 @@ def delete_course(request, course_id):
             messages.success(request, 'Course deleted successfully!')
             return redirect('instructor_dashboard')
         else:
-            messages.error(request,"Course cannot be deleted")
+            messages.error(request,"This course cannot be deleted as there are students currently enrolled. Please unenroll all students before attempting to delete the course. ")
             return redirect('instructor_dashboard')
 
     #except:
@@ -519,10 +519,12 @@ def send_course_for_approval(request, course_id):
     View for instructors to send a course for admin approval.
     """
     course = get_object_or_404(Course, id=course_id, instructor=request.user)
-
-    if course.status == 'draft' or course.status=='rejected':
-        course.send_for_approval()
-        messages.success(request, f'Course "{course.title}" has been sent for admin approval.')
+    if course.status in ['draft', 'rejected']:
+        if course.lessons.exists():  # Check if there are lessons associated with the course
+            course.send_for_approval()
+            messages.success(request, f'Course "{course.title}" has been sent for admin approval.')
+        else:
+            messages.warning(request, f'Course "{course.title}" cannot be sent for approval as no lessons are added.')
     else:
         messages.error(request, 'Only draft courses can be sent for approval.')
 
@@ -605,16 +607,20 @@ def course_detail_view(request, course_id, lesson_id=None):
         if lesson.is_completed:
             completed_count += 1
     progress_percentage = (completed_count / lessons.count()) * 100 if lessons.exists() else 0
+    enrollment=None
     if progress_percentage == 100:
-        enrollment = Enrollment.objects.get(course_id=course.id, student_id=user_id)
+        try:
+            enrollment = Enrollment.objects.get(course_id=course.id, student_id=user_id)
         # Generate the certificate if it doesn't exist
-        Certificate.objects.get_or_create(
-            enrollment=enrollment,
-            defaults={
-                'certificate_url': f'/certificates/{enrollment.id}.pdf',  # Example URL
-                'issued_date': timezone.now()
+            Certificate.objects.get_or_create(
+                enrollment=enrollment,
+                defaults={
+                    'certificate_url': f'/certificates/{enrollment.id}.pdf',  # Example URL
+                    'issued_date': timezone.now()
             }
         )
+        except:
+            print("Error occurred")
 
     # Handle review submission
     if request.method == 'POST' and 'submit_review' in request.POST:
