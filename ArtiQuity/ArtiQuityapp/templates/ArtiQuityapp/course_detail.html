@@ -52,6 +52,30 @@
                 document.getElementById('star-' + i).className = i <= rating ? 'fas fa-star text-yellow-500 text-2xl' : 'far fa-star text-yellow-400 text-2xl';
             }
         }
+
+
+            function showTab(tabName) {
+                // Hide all tab content
+                const tabs = document.querySelectorAll('.tab-content');
+                tabs.forEach(tab => tab.classList.add('hidden'));
+        
+                // Show selected tab content
+                document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+        
+                // Remove active style from all tabs
+                const tabButtons = document.querySelectorAll('[id^="tab-"]');
+                tabButtons.forEach(button => button.classList.remove('border-[#b5651d]', 'text-[#5a3220]'));
+        
+                // Add active style to selected tab
+                document.getElementById(`tab-${tabName}`).classList.add('border-[#b5651d]', 'text-[#5a3220]');
+            }
+        
+            // Set default tab on page load
+            document.addEventListener("DOMContentLoaded", function() {
+                showTab('overview');
+            });
+      
+        
     </script>
 </head>
 <body class="bg-gray-50">
@@ -283,10 +307,36 @@
                 {%endif%}
 
             </div>
-            
-            <!-- Reviews Section -->
+
+            <div class="border-b border-gray-200 mb-6">
+                <nav class="flex space-x-8" aria-label="Tabs">
+                    <button onclick="showTab('overview')" class="text-gray-500 py-4 px-1 border-b-2 font-medium text-sm" id="tab-overview">
+                        Overview
+                    </button>
+                    <button onclick="showTab('reviews')" class="text-gray-500 py-4 px-1 border-b-2 font-medium text-sm" id="tab-reviews">
+                        Reviews
+                    </button>
+                    <button onclick="showTab('announcements')" class="text-gray-500 py-4 px-1 border-b-2 font-medium text-sm" id="tab-announcements">
+                        Announcements
+                    </button>
+                </nav>
+            </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content-overview" class="tab-content">
+            <!-- Overview Content Here -->
+            <h2 class="text-2xl font-semibold text-[#5a3220] mb-4">Course Overview</h2>
+            <p class="text-lg text-[#7a5230] mb-6">{{ course.description }}</p>
+            <!-- Progress bar or other overview-related details -->
+        </div>
+
+        <div id="tab-content-reviews" class="tab-content hidden">
+            <!-- Reviews Section Here -->
+            <h2 class="text-3xl font-semibold text-[#5a3220] mb-4">Course Reviews</h2>
+            <!-- Display course reviews and review form if applicable -->
+                 <!-- Reviews Section -->
             <div class="mt-8">
-                <h2 class="text-3xl font-semibold text-[#5a3220] mb-4">Course Reviews</h2>
+               
                 <div class="flex items-center mb-4">
                    
                     <div class="flex items-center mb-2">
@@ -376,6 +426,18 @@
     </div>
 </div>
 {% endif %}
+</div>
+</div>
+
+        <div id="tab-content-announcements" class="tab-content hidden">
+            <!-- Announcements Section Here -->
+            <h2 class="text-3xl font-semibold text-[#5a3220] mb-4">Course Announcements</h2>
+            <p class="text-gray-700">No announcements yet. Stay tuned!</p>
+        </div>
+    </div>
+</div>
+            
+        
 
             <!-- Navigation Links for Instructor/Student -->
             <div class="mt-10 text-center flex justify-center space-x-8">
