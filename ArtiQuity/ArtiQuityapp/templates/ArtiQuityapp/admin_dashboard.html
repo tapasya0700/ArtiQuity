@@ -7,6 +7,161 @@
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        
+    </style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. User Roles Distribution
+        const userRolesData = {
+            labels: ['Students', 'Instructors', 'Admins'],
+            datasets: [{
+                data: [{{ student_count }}, {{ instructor_count }}, {{ admin_count }}],
+                backgroundColor: ['#4CAF50', '#FF9800', '#2196F3'],
+            }]
+        };
+        new Chart(document.getElementById('userRolesChart'), {
+            type: 'doughnut',
+            data: userRolesData,
+        });
+
+        // 2. Course Status Distribution
+        const courseStatusData = {
+            labels: ['Draft', 'Pending', 'Approved', 'Rejected'],
+            datasets: [{
+                data: [{{ draft_count }}, {{ pending_count }}, {{ approved_count }}, {{ rejected_count }}],
+                backgroundColor: ['#9E9E9E', '#FFEB3B', '#4CAF50', '#F44336'],
+            }]
+        };
+        new Chart(document.getElementById('courseStatusChart'), {
+            type: 'pie',
+            data: courseStatusData,
+        });
+
+        // 3. Active Courses Over Time
+        const activeCoursesData = {
+            labels: [{% for item in active_courses_by_month %}'{{ item.month }}',{% endfor %}],
+            datasets: [{
+                label: 'Active Courses',
+                data: [{% for item in active_courses_by_month %}{{ item.count }},{% endfor %}],
+                borderColor: '#2196F3',
+                fill: false,
+            }]
+        };
+        new Chart(document.getElementById('activeCoursesOverTimeChart'), {
+            type: 'line',
+            data: activeCoursesData,
+        });
+
+        // 4. Enrollments Over Time
+        const enrollmentsData = {
+            labels: [{% for item in enrollments_by_month %}'{{ item.month }}',{% endfor %}],
+            datasets: [{
+                label: 'Enrollments',
+                data: [{% for item in enrollments_by_month %}{{ item.count }},{% endfor %}],
+                borderColor: '#FF5722',
+                fill: false,
+            }]
+        };
+        new Chart(document.getElementById('enrollmentsOverTimeChart'), {
+            type: 'line',
+            data: enrollmentsData,
+        });
+
+        // 5. Earnings Over Time
+        const earningsData = {
+            labels: [{% for item in earnings_by_month %}'{{ item.month }}',{% endfor %}],
+            datasets: [{
+                label: 'Earnings',
+                data: [{% for item in earnings_by_month %}{{ item.total }},{% endfor %}],
+                backgroundColor: '#673AB7',
+            }]
+        };
+        new Chart(document.getElementById('earningsOverTimeChart'), {
+            type: 'bar',
+            data: earningsData,
+        });
+
+        // 6. Course Progress Distribution
+        const courseProgressData = {
+            labels: [{% for item in course_progress %}'{{ item.course__title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Average Progress (%)',
+                data: [{% for item in course_progress %}{{ item.average_progress }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: '#4CAF50',
+            }]
+        };
+        new Chart(document.getElementById('courseProgressChart'), {
+            type: 'bar', // Adjusted type for better display in small spaces
+            data: courseProgressData,
+        });
+        
+
+        // 7. Top Courses by Enrollment
+        const topCoursesData = {
+            labels: [{% for item in top_courses_by_enrollment %}'{{ item.course__title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Enrollments',
+                data: [{% for item in top_courses_by_enrollment %}{{ item.enrollment_count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: '#FF9800',
+            }]
+        };
+        new Chart(document.getElementById('topCoursesByEnrollmentChart'), {
+            type: 'bar',
+            data: topCoursesData,
+        });
+        
+
+        // 8. Review Ratings Distribution
+        const ratingsDistributionData = {
+            labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+            datasets: [{
+                label: 'Ratings',
+                data: [{% for item in review_ratings_distribution %}{{ item.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: '#FFC107',
+            }]
+        };
+        new Chart(document.getElementById('reviewRatingsChart'), {
+            type: 'bar',
+            data: ratingsDistributionData,
+        });
+        
+
+        // 9. Completion Status of Lessons
+        const lessonCompletionData = {
+            labels: ['Completed', 'Not Completed'],
+            datasets: [{
+                data: [{{ completed_lessons_count }}, {{ not_completed_lessons_count }}],
+                backgroundColor: ['#4CAF50', '#F44336'],
+            }]
+        };
+        new Chart(document.getElementById('lessonCompletionChart'), {
+            type: 'pie',
+            data: lessonCompletionData,
+        });
+        
+
+        // 10. Average Ratings for Top Courses
+        const topCoursesRatingsData = {
+            labels: [{% for item in top_courses_by_rating %}'{{ item.course__title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Average Rating',
+                data: [{% for item in top_courses_by_rating %}{{ item.average_rating }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: '#2196F3',
+            }]
+        };
+        new Chart(document.getElementById('topCoursesByRatingChart'), {
+            type: 'bar',
+            data: topCoursesRatingsData,
+        });
+        
+    });
+</script>
+
+    
 </head>
 <body class="bg-gray-100">
 
@@ -26,35 +181,71 @@
         </div>
     </nav>
 
+    
+    
     <!-- Dashboard Container -->
     <div class="container mx-auto my-8 p-4">
         <!-- Dashboard Header -->
+         
         <header class="text-center mb-10">
             <h1 class="text-4xl font-bold text-[#2c3e50] mb-4">Welcome to the Admin Dashboard, {{ request.user.username }}!</h1>
             <p class="text-lg text-gray-600">Manage your platform's content, users, and settings efficiently.</p>
         </header>
-        <!-- Metrics Section -->
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Users Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-2xl font-bold text-[#2c3e50]">{{user_count}}</h3>
-                <p class="text-gray-600">Total Users</p>
-            </div>
-            <!-- Courses Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-2xl font-bold text-[#2c3e50]">{{ active_courses_count }}</h3>
-                <p class="text-gray-600">Active Courses</p>
-            </div>
-            <!-- Earnings Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-2xl font-bold text-[#2c3e50]">$15,780</h3>
-                <p class="text-gray-600">Total Earnings</p>
-            </div>
-            <!-- Enrollments Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-2xl font-bold text-[#2c3e50]">320</h3>
-                <p class="text-gray-600">New Enrollments</p>
-            </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">User Roles Distribution</h3>
+            <canvas id="userRolesChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Course Status Distribution</h3>
+            <canvas id="courseStatusChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Active Courses Over Time</h3>
+            <canvas id="activeCoursesOverTimeChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Enrollments Over Time</h3>
+            <canvas id="enrollmentsOverTimeChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Earnings Over Time</h3>
+            <canvas id="earningsOverTimeChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Course Progress Distribution</h3>
+            <canvas id="courseProgressChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Top Courses by Enrollment</h3>
+            <canvas id="topCoursesByEnrollmentChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Review Ratings Distribution</h3>
+            <canvas id="reviewRatingsChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Lesson Completion Status</h3>
+            <canvas id="lessonCompletionChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-2xl font-bold text-[#2c3e50]">Average Ratings for Top Courses</h3>
+            <canvas id="topCoursesByRatingChart" style="width: 100px; height: 100px;"></canvas>
+        </div>
+    
+
+        <!-- Metrics Section -->
+        
+           
         </section>
         <section class="bg-white p-8 rounded-lg shadow-md mb-10">
             <h2 class="text-3xl font-bold text-[#2c3e50] mb-6">Courses Awaiting Approval</h2>
@@ -71,17 +262,21 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for course in pending_courses %}
+                         {% for course in course_data %} 
+                         {%if course.course.status == 'pending'%}
                         <tr class="hover:bg-gray-100">
-                            <td class="border-b p-4 text-sm">{{ course.title }}</td>
-                            <td class="border-b p-4 text-sm">{{ course.instructor.username }}</td>
-                            <td class="border-b p-4 text-sm">${{ course.price }}</td>
-                            <td class="border-b p-4 text-sm capitalize">{{ course.status }}</td>
+                            <td class="border-b p-4 text-sm">{{ course.course.title }}</td>
+                            <td class="border-b p-4 text-sm">{{ course.course.instructor.username }}</td>
+                            <td class="border-b p-4 text-sm">${{ course.course.price }}</td>
+                            <td class="border-b p-4 text-sm capitalize">{{ course.course.status }}</td>
                             <td class="border-b p-4 text-sm">
-                                <a href="{% url 'approve_course' course.id %}" class="text-green-500 hover:text-green-700">Approve</a> | 
-                                <a href="{% url 'reject_course' course.id %}" class="text-red-500 hover:text-red-700">Reject</a>
+                               
+                                <a href=" {% url 'course_detail' course.course.id course.first_lesson_id|default:0 %}" class="text-blue-500 hover:text-blue-700">View</a> |
+                                <a href="{% url 'approve_course' course.course.id %}" class="text-green-500 hover:text-green-700">Approve</a> | 
+                                <a href="{% url 'reject_course' course.course.id %}" class="text-red-500 hover:text-red-700">Reject</a>
                             </td>
                         </tr>
+                        {%endif%}
                         {% endfor %}
                     </tbody>
                 </table>
