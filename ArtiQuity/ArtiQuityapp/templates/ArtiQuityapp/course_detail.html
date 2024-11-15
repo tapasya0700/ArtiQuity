@@ -229,7 +229,7 @@
                                 </span>
                                 {% endif %}
             
-                                {% if role == 'instructor' %}
+                                {% if role == 'instructor' or role == 'admin' %}
                                 <div class="flex items-center space-x-3">
                                     <a href="{% url 'edit_lesson' lesson.id %}" class="text-[#e1b12c] hover:text-[#fbc531] transition duration-300" title="Edit">
                                         <i class="fas fa-edit"></i>
@@ -287,7 +287,7 @@
                     {% endif %}
                 </div>
                 {%endif%}
-                {% if role == 'instructor' %}
+                {% if role == 'instructor' or role == 'admin' %}
                 <div class="col-span-2 bg-gray-100 p-4 rounded-lg shadow-md">
                     <h2 class="text-2xl font-semibold text-[#5a3220] mb-4">Lesson Video</h2>
                     {% if selected_lesson.video_file %}
@@ -453,6 +453,12 @@
                 {% endif %}
                 {% if role == 'student' %}
                     <a href="{% url 'student_dashboard' %}" class="text-[#5a3220] font-semibold hover:text-[#b5651d] transition duration-300 flex items-center space-x-2">
+                        <i class="fas fa-arrow-left text-[#5a3220] bg-[#f2e4db] rounded-full p-2"></i>
+                        <span>Back to Dashboard</span>
+                    </a>
+                {% endif %}
+                {% if role == 'admin' %}
+                    <a href="{% url 'admin_dashboard' %}" class="text-[#5a3220] font-semibold hover:text-[#b5651d] transition duration-300 flex items-center space-x-2">
                         <i class="fas fa-arrow-left text-[#5a3220] bg-[#f2e4db] rounded-full p-2"></i>
                         <span>Back to Dashboard</span>
                     </a>

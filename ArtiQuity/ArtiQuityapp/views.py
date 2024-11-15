@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout
 import os
+from django.db.models import Sum, Count
 from .models import User,Cart,Payment,Enrollment
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
@@ -304,39 +305,100 @@ def admin_login(request):
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import User, Course
+from django.utils import timezone
+from django.db.models.functions import ExtractMonth
 def admin_dashboard(request):
     # Check if the logged-in user has the role of 'admin'
     if request.session.get('user_role') != 'admin':
         messages.error(request, "Access denied! Only admins can access this page.")
         return redirect('home')
-
-    # Retrieve all users and count them
     users = User.objects.all()
     user_count = users.count()
 
+
     # Retrieve all courses and filter approved ones for counting active courses
+    course_data=[]
     courses = Course.objects.all()
-    active_courses_count = courses.filter(status='approved').count()
+    for course in courses:
+        first_lesson = course.lessons.first()  # Get the first lesson, if it exists
+        course_data.append({
+                'course': course,
+            'first_lesson_id': first_lesson.id if first_lesson else None,
+        })  
+    student_count = User.objects.filter(role='student').count()
+    instructor_count = User.objects.filter(role='instructor').count()
+    admin_count = User.objects.filter(role='admin').count()
 
-    # Filter courses with status 'pending'
+    # Course status distribution
+    draft_count = Course.objects.filter(status='draft').count()
+    pending_count = Course.objects.filter(status='pending').count()
     pending_courses = courses.filter(status='pending')
+    print("pending")
+    print(pending_courses)
+    approved_count = Course.objects.filter(status='approved').count()
+    rejected_count = Course.objects.filter(status='rejected').count()
 
-    # Search functionality for courses
-    search_query = request.GET.get('search', '')
-    if search_query:
-        courses = courses.filter(title__icontains=search_query)
+    # Active courses over time (monthly)
+    current_year = timezone.now().year
+    active_courses_by_month = Course.objects.filter(
+        status='approved', created_at__year=current_year
+    ).annotate(month=ExtractMonth('created_at')).values('month').annotate(count=Count('id')).order_by('month')
 
-    # Debug print statement (optional, remove in production)
-    print(f"Filtered courses: {courses}")
+    # Enrollments over time (monthly)
+    enrollments_by_month = Enrollment.objects.annotate(
+        month=ExtractMonth('enrolled_at')
+    ).values('month').annotate(count=Count('id')).order_by('month')
 
-    # Render the admin dashboard with context data
+    # Earnings over time (monthly)
+    earnings_by_month = Payment.objects.filter(payment_status='completed').annotate(
+        month=ExtractMonth('payment_date')
+    ).values('month').annotate(total=Sum('amount')).order_by('month')
+
+    # Course progress distribution
+    course_progress = Enrollment.objects.values('course__title').annotate(
+        average_progress=Avg('progress')
+    ).order_by('-average_progress')
+
+    # Top courses by enrollment
+    top_courses_by_enrollment = Enrollment.objects.values(
+        'course__title'
+    ).annotate(enrollment_count=Count('id')).order_by('-enrollment_count')[:5]
+    print(top_courses_by_enrollment)
+    # Review ratings distribution
+    review_ratings_distribution = Review.objects.values('rating').annotate(
+        count=Count('id')
+    ).order_by('rating')
+    print(review_ratings_distribution)
+    # Completion status of lessons
+    completed_lessons_count = Progress.objects.filter(is_completed=True).count()
+    not_completed_lessons_count = Progress.objects.filter(is_completed=False).count()
+
+    # Average ratings for top courses
+    top_courses_by_rating = Review.objects.values('course__title').annotate(
+        average_rating=Avg('rating')
+    ).order_by('-average_rating')[:5]
+    print(top_courses_by_rating)
     context = {
-        'courses': courses,
-        'users': users,
-        'user_count': user_count,
-        'active_courses_count': active_courses_count,
-        'pending_courses': pending_courses,
-        'search_query': search_query  # Pass the search query to maintain it in the template
+        'users':users,
+        'courses':courses,
+        'student_count': student_count,
+        'instructor_count': instructor_count,
+        'admin_count': admin_count,
+        'draft_count': draft_count,
+        'pending_count': pending_count,
+        'pending_courses':pending_courses,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'active_courses_by_month': list(active_courses_by_month),
+        'enrollments_by_month': list(enrollments_by_month),
+        'earnings_by_month': list(earnings_by_month),
+        'course_progress': list(course_progress),
+        'top_courses_by_enrollment': list(top_courses_by_enrollment),
+        'review_ratings_distribution': list(review_ratings_distribution),
+        'completed_lessons_count': completed_lessons_count,
+        'not_completed_lessons_count': not_completed_lessons_count,
+        'top_courses_by_rating': list(top_courses_by_rating),
+        'course_data':course_data,
     }
     return render(request, 'ArtiQuityapp/admin_dashboard.html', context)
 
@@ -828,7 +890,7 @@ def process_payment(request):
                     payment = Payment.objects.create(
                             student=request.user,
                               amount=total_price,
-                   
+                            payment_status='completed',
                                 transaction_id=charge.id,  # Assuming you store Stripe charge IDs
                             )
                     for items in cart_items:
