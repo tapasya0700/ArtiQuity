@@ -41,7 +41,7 @@
                 <!-- Dropdown Menu -->
                 <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex transition ease-in-out duration-150 z-50">
                     <!-- Dropdown Links -->
-                    <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
+                    <a href="{% url 'profile_view' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
                     <a href="{% url 'enrolled_courses' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Learning</a>
                     <a href="{% url 'view_cart' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Cart</a>
                     <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">Account Settings</a>

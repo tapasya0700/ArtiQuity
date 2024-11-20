@@ -1087,4 +1087,27 @@ def download_certificate_as_pdf(request, enrollment_id):
         return HttpResponse('We had some errors with your PDF', status=500)
 
     return response
+from .forms import UserProfileForm  
 
+
+@login_required
+def profile_view(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('profile_view')
+        else:
+            # Log errors for debugging
+            print("Form errors:", form.errors)
+            messages.error(request, 'There was an error updating your profile. Please check the details.')
+    else:
+        form = UserProfileForm(instance=user)
+
+    context = {
+        'form': form,
+        'user': user,
+    }
+    return render(request, 'ArtiQuityapp/profile.html', context)

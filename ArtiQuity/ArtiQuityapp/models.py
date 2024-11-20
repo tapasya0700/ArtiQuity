@@ -10,7 +10,7 @@ class User(models.Model):
     password_hash = models.CharField(max_length=255)
     first_name = models.CharField(max_length=100,validators=[ValidateName])
     last_name = models.CharField(max_length=100,validators=[ValidateName])
-    profile_picture = models.CharField(max_length=255, blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     role = models.CharField(max_length=50, choices=[('student', 'Student'), ('instructor', 'Instructor'), ('admin', 'Admin')])
     created_at = models.DateTimeField(auto_now_add=True)

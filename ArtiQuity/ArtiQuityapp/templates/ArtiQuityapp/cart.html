@@ -21,6 +21,14 @@
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">About</a>
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">Contact</a>
             </div>
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'view_cart' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                    View Cart
+                </a>
+                <a href="{% url 'enrolled_courses' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                    My Courses
+                </a>
+            </div>
             <div class="relative group">
                 <!-- Profile Section -->
                 <button class="flex items-center space-x-3 bg-gray-100 text-gray-700 px-4 py-2 rounded-full focus:outline-none hover:bg-gray-200 transition duration-300">
@@ -38,7 +46,7 @@
                 <!-- Dropdown Menu -->
                 <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex transition ease-in-out duration-150 z-50">
                     <!-- Dropdown Links -->
-                    <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
+                    <a href="{% url 'profile_view' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
                     <a href="{% url 'enrolled_courses' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Learning</a>
                     <a href="{% url 'view_cart' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Cart</a>
                     <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">Account Settings</a>

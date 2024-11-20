@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(90deg, rgba(210,180,140,1) 0%, rgba(245,222,179,1) 100%);
+            color: #4E342E; /* Rich brown for text to match the theme */
+        }
+        .profile-header img {
+            border: 4px solid white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-[#77390c] shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-white">ArtiQuity</a>
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Home</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Courses</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">About</a>
+                <a href="#" class="text-white hover:text-gray-200 transition duration-300">Contact</a>
+            </div>
+            {% if user.role == 'student'%}
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'view_cart' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                    View Cart
+                </a>
+                <a href="{% url 'enrolled_courses' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                    My Courses
+                </a>
+            </div>
+            {%endif%}
+            <div class="relative group">
+                <button class="flex items-center space-x-3 bg-gray-100 text-gray-700 px-4 py-2 rounded-full focus:outline-none hover:bg-gray-200 transition duration-300">
+                    <img src="{% if request.user.profile_picture %} {{ request.user.profile_picture.url }} {% else %} https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png {% endif %}" 
+                         alt="Profile" class="w-10 h-10 rounded-full shadow-md object-cover">
+                    <span class="font-medium text-gray-800">{{ request.user.username }}</span>
+                    <i class="fas fa-caret-down text-gray-500"></i>
+                </button>
+                <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex transition ease-in-out duration-150 z-50">
+                    <a href="{% url 'profile_view' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
+                    {% if user.role == 'student'%}
+                    <a href="{% url 'enrolled_courses' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Learning</a>
+                    <a href="{% url 'view_cart' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Cart</a>
+                    {% endif%}
+                    <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">Account Settings</a>
+                    <a href="{% url 'user_logout' %}" class="block px-4 py-3 text-red-600 hover:bg-gray-100">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div id="alert-{{ forloop.counter }}" class="p-4 rounded-lg shadow-md mb-3 transition duration-300 relative
+        {% if message.tags == 'success' %} bg-green-500 text-white
+        {% elif message.tags == 'error' %} bg-red-500 text-white
+        {% elif message.tags == 'warning' %} bg-yellow-500 text-black
+        {% elif message.tags == 'info' %} bg-blue-500 text-white
+        {% else %} bg-gray-300 text-black {% endif %}">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    {% if message.tags == 'success' %}
+                    <svg class="w-6 h-6 text-green-200 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {% elif message.tags == 'error' %}
+                    <svg class="w-6 h-6 text-red-200 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {% elif message.tags == 'warning' %}
+                    <svg class="w-6 h-6 text-yellow-200 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01" />
+                        <path d="M12 4a9 9 0 100 18 9 9 0 000-18z" />
+                    </svg>
+                    {% elif message.tags == 'info' %}
+                    <svg class="w-6 h-6 text-blue-200 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01" />
+                        <path d="M12 4a9 9 0 100 18 9 9 0 000-18z" />
+                    </svg>
+                    {% endif %}
+                </div>
+                <div class="flex-grow">
+                    {{ message }}
+                </div>
+                <button onclick="document.getElementById('alert-{{ forloop.counter }}').style.display='none'" class="ml-4 text-white hover:text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <!-- Profile Header -->
+    <div class="profile-header py-12">
+        <div class="container mx-auto flex flex-col items-center">
+            <div class="relative mb-6">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="w-40 h-40 rounded-full shadow-lg object-cover">
+                {% else %}
+                    <img src="{% static 'default_profile.png' %}" alt="Default Profile Picture" class="w-40 h-40 rounded-full shadow-lg object-cover">
+                {% endif %}
+            </div>
+            <div class="text-center">
+                <h1 class="text-4xl font-bold">{{ user.first_name }} {{ user.last_name }}</h1>
+                <p class="text-lg">@{{ user.username }}</p>
+                <p class="mt-2">{{ user.email }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="container mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Personal Details -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Personal Details</h2>
+                <ul class="space-y-2">
+                    <li class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-800">Role:</span>
+                        <span class="text-gray-600 capitalize">{{ user.role }}</span>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-800">Last Login:</span>
+                        <span class="text-gray-600">{{ user.last_login|date:"F j, Y, g:i A" }}</span>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-800">Joined On:</span>
+                        <span class="text-gray-600">{{ user.created_at|date:"F j, Y" }}</span>
+                    </li>
+                </ul>
+            </div>
+            <!-- About Me -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">About Me</h2>
+                <p class="text-gray-600">
+                    {% if user.bio %}
+                        {{ user.bio }}
+                    {% else %}
+                        <span class="italic text-gray-400">No bio added yet.</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Edit Profile Section -->
+        <div class="mt-8 bg-gray-50 p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Edit Profile</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="first_name" class="block text-gray-600">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-gray-600">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div>
+                        <label for="profile_picture" class="block text-gray-600">Profile Picture</label>
+                        {{ form.profile_picture }}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="bio" class="block text-gray-600">Bio</label>
+                    {{ form.bio }}
+                </div>
+                <div class="mt-6 text-right">
+                    <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+     <!-- Navigation Links for Instructor/Student -->
+     <div class="mt-10 text-center flex justify-center space-x-8">
+        {% if user.role == 'instructor' %}
+            <a href="{% url 'instructor_dashboard' %}" class="text-[#5a3220] font-semibold hover:text-[#b5651d] transition duration-300 flex items-center space-x-2">
+                <i class="fas fa-arrow-left text-[#5a3220] bg-[#f2e4db] rounded-full p-2"></i>
+                <span>Back to Dashboard</span>
+            </a>
+          
+        {% endif %}
+        {% if user.role == 'student' %}
+            <a href="{% url 'student_dashboard' %}" class="text-[#5a3220] font-semibold hover:text-[#b5651d] transition duration-300 flex items-center space-x-2">
+                <i class="fas fa-arrow-left text-[#5a3220] bg-[#f2e4db] rounded-full p-2"></i>
+                <span>Back to Dashboard</span>
+            </a>
+        {% endif %}
+        {% if user.role == 'admin' %}
+            <a href="{% url 'admin_dashboard' %}" class="text-[#5a3220] font-semibold hover:text-[#b5651d] transition duration-300 flex items-center space-x-2">
+                <i class="fas fa-arrow-left text-[#5a3220] bg-[#f2e4db] rounded-full p-2"></i>
+                <span>Back to Dashboard</span>
+            </a>
+        {% endif %}
+    </div>
+    <!-- Footer -->
+    <footer class="bg-[#77390c] shadow-md mt-10">
+        <div class="container mx-auto text-center py-4">
+            <p class="text-white">&copy; 2024 ArtiQuity. All Rights Reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

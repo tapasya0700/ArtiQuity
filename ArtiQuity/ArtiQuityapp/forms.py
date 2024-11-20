@@ -95,3 +95,55 @@ class ReviewForm(forms.ModelForm):
             'rating': forms.Select(choices=[(i, str(i)) for i in range(1, 6)], attrs={'class': 'form-select'}),
             'comment': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3, 'placeholder': 'Write your review...'}),
         }
+
+
+
+
+from django.core.exceptions import ValidationError
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [ 'first_name', 'last_name', 'profile_picture', 'bio']
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300',
+                'placeholder': 'Username',
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300',
+                'placeholder': 'Email',
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300',
+                'placeholder': 'First Name',
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300',
+                'placeholder': 'Last Name',
+            }),
+            'bio': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300',
+                'placeholder': 'Write something about yourself...',
+                'rows': 4,
+            }),
+            'profile_picture': forms.FileInput(attrs={
+                'class': 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.get('instance', None)  # Get the instance (current user)
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("This email is already in use.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("This username is already taken. Please choose another.")
+        return username
