@@ -38,5 +38,6 @@ urlpatterns = [
     path('download_certificate/<int:enrollment_id>/', views.download_certificate_as_pdf, name='download_certificate_as_pdf'),
 
        path('certificate/<int:enrollment_id>/', views.generate_certificate_view, name='certificate_view'),
+       path('profile/', views.profile_view, name='profile_view'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
