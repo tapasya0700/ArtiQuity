@@ -81,6 +81,7 @@ def instructor_dashboard(request):
         return redirect('home')
 
     # Retrieve all courses created by the instructor
+    courses = Course.objects.filter(instructor=request.user)
     course_data = []
     status_filters = request.GET.getlist('status_filter')
     if status_filters:
@@ -89,8 +90,37 @@ def instructor_dashboard(request):
        
         all_courses = Course.objects.filter(instructor=request.user)    
  
+
     
-     # Retrieve selected filters
+  # Analytics Data
+    # 1. Enrollments and Earnings per Course
+    course_analytics=[]
+    reviews_data=[]
+    for course in courses:
+        total_enrollments = Enrollment.objects.filter(course_id=course.id).count()
+        total_earnings= total_enrollments*course.price
+        total_reviews = Review.objects.filter(course=course).count()
+        # Count ratings for each star (1 to 5)
+        rating_counts = Review.objects.filter(course=course).values('rating').annotate(count=Count('id')).order_by('rating')
+
+        # Create a structured dictionary for the course
+        course_reviews = {
+            'course_name': course.title,
+            'total_reviews': total_reviews,
+            'ratings': {rating['rating']: rating['count'] for rating in rating_counts},  # Organize ratings by star
+        }
+        reviews_data.append(course_reviews)
+        course_analytics.append({
+            'title': course.title,
+            'total_enrollments': total_enrollments,
+            'total_earnings':total_earnings,
+
+        })
+  
+
+    # 2. Reviews Distribution
+   
+
   
 
     # Apply search filter if a query is provided
@@ -114,6 +144,8 @@ def instructor_dashboard(request):
         'search_query': search_query,  # Pass the search query to maintain it in the template if needed
         'course_data': course_data,
         'status_filters': status_filters,
+        'course_analytics': course_analytics,
+        'reviews_data': reviews_data,
     })
 
 

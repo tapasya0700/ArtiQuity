@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-50">
 
@@ -45,7 +46,7 @@
     <div class="mb-4">
         {% for message in messages %}
         <div id="alert-{{ forloop.counter }}" class="
-        p-4 rounded-lg shadow-md mb-3 transition duration-300 relative
+        p-4 rounded-lg shadow-md mb-3 transition duration-300 relativ
         {% if message.tags == 'success' %} bg-green-500 text-white
         {% elif message.tags == 'error' %} bg-red-500 text-white
         {% elif message.tags == 'warning' %} bg-yellow-500 text-black
@@ -112,64 +113,136 @@
         <div class="container mx-auto flex">
             <aside class="w-1/4">
             </aside>
-            <main class="w-3/4 ml-4">
-        <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">All Courses</h2>
+            <main class="w-3/4 ml-4" >
+        <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6" >All Courses</h2>
             </main>
     </div>
         <div class="container mx-auto flex">
           <!-- Sidebar Filter Section -->
-<aside class="w-1/4 bg-gradient-to-br from-brown-100 to-beige-100 text-gray-800 p-6 shadow-lg rounded-lg">
-    <h2 class="text-2xl font-bold mb-6">Filter by Status</h2>
-    <form method="GET" action="{% url 'instructor_dashboard' %}">
-        <div class="flex flex-col space-y-4">
-
-            <label class="flex items-center cursor-pointer">
-                <input type="checkbox" name="status_filter" value="pending"
-                       {% if 'pending' in status_filters %}checked{% endif %}
-                       class="form-checkbox h-5 w-5 text-purple-600 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
-                <span class="ml-3 text-lg flex items-center">
-                    <i class="fas fa-clock mr-2"></i>Pending
-                </span>
-            </label>
-
-            <label class="flex items-center cursor-pointer">
-                <input type="checkbox" name="status_filter" value="approved"
-                       {% if 'approved' in status_filters %}checked{% endif %}
-                       class="form-checkbox h-5 w-5 text-green-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
-                <span class="ml-3 text-lg flex items-center">
-                    <i class="fas fa-check-circle mr-2"></i>Approved
-                </span>
-            </label>
-
-            <label class="flex items-center cursor-pointer">
-                <input type="checkbox" name="status_filter" value="rejected"
-                       {% if 'rejected' in status_filters %}checked{% endif %}
-                       class="form-checkbox h-5 w-5 text-red-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
-                <span class="ml-3 text-lg flex items-center">
-                    <i class="fas fa-times-circle mr-2"></i>Rejected
-                </span>
-            </label>
-
-            <label class="flex items-center cursor-pointer">
-                <input type="checkbox" name="status_filter" value="draft"
-                       {% if 'draft' in status_filters %}checked{% endif %}
-                       class="form-checkbox h-5 w-5 text-yellow-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
-                <span class="ml-3 text-lg flex items-center">
-                    <i class="fas fa-pencil-alt mr-2"></i>Draft
-                </span>
-            </label>
-        </div>
-        <button type="submit"
-                class="mt-6 w-full bg-white text-purple-600 font-semibold py-2 rounded-lg hover:bg-purple-100 transition duration-300 shadow-md hover:shadow-lg">
-            Apply Filter
-        </button>
-    </form>
-</aside>
-
+          <aside class="w-1/4 bg-gradient-to-br from-[#f8f4eb] to-[#e6ddc5] text-gray-800 p-6 shadow-lg rounded-lg">
+            <!-- Sidebar Main Sections -->
+            <h2 class="text-2xl font-bold mb-6">Dashboard Options</h2>
+            <ul class="space-y-4">
+                <li>
+                    <button onclick="showSidebarSection('filterByStatus')" 
+                            class="flex items-center text-lg text-gray-800 hover:text-blue-600 transition duration-300 w-full text-left">
+                        <i class="fas fa-book mr-2"></i>
+                        Courses
+                    </button>
+                </li>
+                <li>
+                    <button onclick="showSidebarSection('performanceAnalytics')" 
+                            class="flex items-center text-lg text-gray-800 hover:text-green-600 transition duration-300 w-full text-left">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Performance Analytics
+                    </button>
+                </li>
+            </ul>
+        
+            <!-- Filter by Status Section -->
+            <div id="filterByStatus" class="hidden mt-8">
+                <h2 class="text-2xl font-bold mb-6">Filter by Status</h2>
+                <form method="GET" action="{% url 'instructor_dashboard' %}">
+                    <div class="flex flex-col space-y-4">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                   class="form-checkbox h-5 w-5 text-purple-600 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                            <span class="ml-3 text-lg flex items-center">
+                                <i class="fas fa-th-list mr-2"></i>All
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="status_filter" value="pending"
+                                   {% if 'pending' in status_filters %}checked{% endif %}
+                                   class="form-checkbox h-5 w-5 text-purple-600 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                            <span class="ml-3 text-lg flex items-center">
+                                <i class="fas fa-clock mr-2"></i>Pending
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="status_filter" value="approved"
+                                   {% if 'approved' in status_filters %}checked{% endif %}
+                                   class="form-checkbox h-5 w-5 text-green-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                            <span class="ml-3 text-lg flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>Approved
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="status_filter" value="rejected"
+                                   {% if 'rejected' in status_filters %}checked{% endif %}
+                                   class="form-checkbox h-5 w-5 text-red-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                            <span class="ml-3 text-lg flex items-center">
+                                <i class="fas fa-times-circle mr-2"></i>Rejected
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="status_filter" value="draft"
+                                   {% if 'draft' in status_filters %}checked{% endif %}
+                                   class="form-checkbox h-5 w-5 text-yellow-500 bg-gray-100 rounded focus:ring-0 focus:ring-offset-0">
+                            <span class="ml-3 text-lg flex items-center">
+                                <i class="fas fa-pencil-alt mr-2"></i>Draft
+                            </span>
+                        </label>
+                    </div>
+                    <button type="submit"
+                            class="mt-6 w-full bg-white text-purple-600 font-semibold py-2 rounded-lg hover:bg-purple-100 transition duration-300 shadow-md hover:shadow-lg">
+                        Apply Filter
+                    </button>
+                </form>
+            </div>
+        
+            <!-- Performance Analytics Section -->
+            <div id="performanceAnalytics" class="hidden mt-8">
+                <h2 class="text-2xl font-bold mb-6">Performance Analytics</h2>
+                <ul class="space-y-4">
+                    <li>
+                        <button onclick="showSection('enrollmentsSection')" 
+                                class="flex items-center text-lg text-gray-800 hover:text-blue-600 transition duration-300 w-full text-left">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            Enrollments
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showSection('earningsSection')" 
+                                class="flex items-center text-lg text-gray-800 hover:text-green-600 transition duration-300 w-full text-left">
+                            <i class="fas fa-dollar-sign mr-2"></i>
+                            Earnings
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showSection('reviewsSection')" 
+                                class="flex items-center text-lg text-gray-800 hover:text-yellow-600 transition duration-300 w-full text-left">
+                            <i class="fas fa-star mr-2"></i>
+                            Reviews
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+        
 
             <main class="w-3/4 ml-4">
+                <section id="enrollmentsSection" class="hidden">
+                    <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Enrollments Analytics</h2>
+                    <canvas id="enrollmentsChart"></canvas>
+                </section>
+            
+                <!-- Earnings Chart Section -->
+                <section id="earningsSection" class="hidden">
+                    <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Earnings Analytics</h2>
+                    <canvas id="earningsChart"></canvas>
+                </section>
+            
+                <!-- Reviews Chart Section -->
+                <section id="reviewsSection" class="hidden">
+                    <h2 class="text-2xl font-semibold text-center text-[#2c3e50] mb-6">Reviews Analytics</h2>
+                    <canvas id="reviewsChart"></canvas>
+                </section>
+            
+                <!-- All Courses Section -->
+               
         <!-- All Courses Section -->
-        <section class="courses-section">
+        <section class="courses-section" id ="coursesSection">
             
             {% if all_courses %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -222,6 +295,9 @@
             {% endif %}
         </div>
         </section>
+         <!-- Analytics Section -->
+     
+
          <!-- Footer Section -->
         <footer class="bg-[#77390c] shadow-md">
             <div class="container mx-auto text-center">
@@ -234,7 +310,187 @@
     </main>
 
    
-  
+    <script>
+        function showSidebarSection(sectionId) {
+            // Hide all sections
+            document.getElementById('filterByStatus').classList.add('hidden');
+            document.getElementById('performanceAnalytics').classList.add('hidden');
+    
+            // Show the selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+    
+        function showSection(sectionId) {
+            // Hide all sections in the main content area
+            document.getElementById('enrollmentsSection').classList.add('hidden');
+            document.getElementById('earningsSection').classList.add('hidden');
+            document.getElementById('reviewsSection').classList.add('hidden');
+            document.getElementById('coursesSection').classList.add('hidden');
+    
+            // Show the selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Enrollments Chart
+            const enrollmentsChartCtx = document.getElementById('enrollmentsChart').getContext('2d');
+            new Chart(enrollmentsChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for course in course_analytics %}'{{ course.title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    datasets: [{
+                        label: 'Enrollments',
+                        data: [{% for course in course_analytics %}{{ course.total_enrollments }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                        backgroundColor: '#4CAF50',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Total Enrollments by Course'
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Courses'
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Enrollments'
+                            },
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
+    
+            // Earnings Chart
+            const earningsChartCtx = document.getElementById('earningsChart').getContext('2d');
+            new Chart(earningsChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for course in course_analytics %}'{{ course.title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    datasets: [{
+                        label: 'Earnings ($)',
+                        data: [{% for course in course_analytics %}{{ course.total_earnings }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                        backgroundColor: '#FF9800',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Earnings by Course'
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Courses'
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Earnings ($)'
+                            },
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
+    
+            // Reviews Chart
+            const reviewsChartCtx = document.getElementById('reviewsChart').getContext('2d');
+    
+            // Preparing data for the Reviews chart
+            const courseNames = [{% for course in reviews_data %}'{{ course.course_name }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const oneStarReviews = [{% for course in reviews_data %}{{ course.ratings.1|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const twoStarReviews = [{% for course in reviews_data %}{{ course.ratings.2|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const threeStarReviews = [{% for course in reviews_data %}{{ course.ratings.3|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const fourStarReviews = [{% for course in reviews_data %}{{ course.ratings.4|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const fiveStarReviews = [{% for course in reviews_data %}{{ course.ratings.5|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    
+            new Chart(reviewsChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: courseNames, // Course Names
+                    datasets: [
+                        {
+                            label: '1 Star',
+                            data: oneStarReviews,
+                            backgroundColor: '#FF5722',
+                        },
+                        {
+                            label: '2 Stars',
+                            data: twoStarReviews,
+                            backgroundColor: '#FF9800',
+                        },
+                        {
+                            label: '3 Stars',
+                            data: threeStarReviews,
+                            backgroundColor: '#FFC107',
+                        },
+                        {
+                            label: '4 Stars',
+                            data: fourStarReviews,
+                            backgroundColor: '#8BC34A',
+                        },
+                        {
+                            label: '5 Stars',
+                            data: fiveStarReviews,
+                            backgroundColor: '#4CAF50',
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Course Reviews by Star Ratings'
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Courses'
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Number of Reviews'
+                            },
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
+        });
+    </script>
+    
+    
 
 </body>
 
