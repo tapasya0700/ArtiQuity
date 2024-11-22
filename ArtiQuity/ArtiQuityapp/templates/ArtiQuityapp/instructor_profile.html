@@ -4,23 +4,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
+    <title>Instructor Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(90deg, rgba(210,180,140,1) 0%, rgba(245,222,179,1) 100%);
+            color: #4E342E; /* Rich brown for text to match the theme */
+        }
+        .profile-header img {
+            border: 4px solid white;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Navbar Section -->
+<body class="bg-gray-100">
+    <!-- Navbar -->
     <nav class="bg-[#77390c] shadow-md">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <a href="#" class="text-2xl font-bold text-white">ArtiQuity</a>
-
             <div class="hidden md:flex items-center space-x-4">
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">Home</a>
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">Courses</a>
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">About</a>
                 <a href="#" class="text-white hover:text-gray-200 transition duration-300">Contact</a>
             </div>
+            {% if user.role == 'student'%}
             <div class="flex items-center space-x-4">
                 <a href="{% url 'view_cart' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
                     View Cart
@@ -29,6 +43,7 @@
                     My Courses
                 </a>
             </div>
+            {%endif%}
             <div class="relative group">
                 <button class="flex items-center space-x-3 bg-gray-100 text-gray-700 px-4 py-2 rounded-full focus:outline-none hover:bg-gray-200 transition duration-300">
                     <img src="{% if request.user.profile_picture %} {{ request.user.profile_picture.url }} {% else %} https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png {% endif %}" 
@@ -36,11 +51,12 @@
                     <span class="font-medium text-gray-800">{{ request.user.username }}</span>
                     <i class="fas fa-caret-down text-gray-500"></i>
                 </button>
-
                 <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md group-focus-within:flex transition ease-in-out duration-150 z-50">
                     <a href="{% url 'profile_view' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">View Profile</a>
+                    {% if user.role == 'student'%}
                     <a href="{% url 'enrolled_courses' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Learning</a>
                     <a href="{% url 'view_cart' %}" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">My Cart</a>
+                    {% endif%}
                     <a href="#" class="block px-4 py-3 text-gray-600 hover:bg-gray-100 border-b">Account Settings</a>
                     <a href="{% url 'user_logout' %}" class="block px-4 py-3 text-red-600 hover:bg-gray-100">Logout</a>
                 </div>
@@ -91,58 +107,90 @@
         {% endfor %}
     </div>
     {% endif %}
-
-    <div class="container mx-auto my-8 p-4">
-        <header class="text-center">
-            <h1 class="text-3xl font-bold text-[#2c3e50] mb-4">Welcome to the Student Dashboard, {{ request.user.username }}!</h1>
-            <p class="text-lg text-gray-600">Explore the best art courses available and add them to your learning journey.</p>
-        </header>
-
-        <hr class="my-6 border-gray-300">
-        <div class="mt-10 text-center">
-    
-        </div>
-
-        <section class="py-8">
-            
-            <div class="container mx-auto mb-6">
-                <form method="GET" action="" class="flex">
-                    <input type="text" name="search" value="{{ search_query }}"
-                           placeholder="Search Courses..."
-                           class="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-300" />
-                    <button type="submit"
-                            class="ml-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none">
-                        Search
-                    </button>
-                </form>
+    <!-- Profile Header -->
+    <div class="profile-header py-12">
+        <div class="container mx-auto flex flex-col items-center">
+            <div class="relative mb-6">
+                {% if instructor.profile_picture %}
+                    <img src="{{ instructor.profile_picture.url }}" alt="Profile Picture" class="w-40 h-40 rounded-full shadow-lg object-cover">
+                {% else %}
+                    <img src="{% static 'default_profile.png' %}" alt="Default Profile Picture" class="w-40 h-40 rounded-full shadow-lg object-cover">
+                {% endif %}
             </div>
+            <div class="text-center">
+                <h1 class="text-4xl font-bold">{{ instructor.first_name }} {{ instructor.last_name }}</h1>
+                <p class="text-lg">@{{ instructor.username }}</p>
+                <p class="mt-2">{{ instructor.email }}</p>
+            </div>
+        </div>
+    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for course_info in course_data %}
-                {% if course_info.course.status == 'approved' %}
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-300">
-                    <div class="h-48 bg-cover bg-center" style="background-image: url({% if course_info.course.thumbnail %}{{ course_info.course.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
+    <!-- Profile Content -->
+    <div class="container mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Personal Details -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Personal Details</h2>
+                <ul class="space-y-2">
+                    <li class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-800">Name:</span>
+                        <span class="text-gray-600 capitalize">{{ instructor.first_name }} {{ instructor.last_name }}</span>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-800">Role:</span>
+                        <span class="text-gray-600 capitalize">{{ instructor.role }}</span>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-800">Total Courses:</span>
+                        <span class="text-gray-600 capitalize">{{ course_count }}</span>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-800">Total Enrollments:</span>
+                        <span class="text-gray-600 capitalize">{{ enrollment_count }}</span>
+                    </li>
+
+                    
+                
+                </ul>
+            </div>
+            <!-- About Me -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">About Me</h2>
+                <p class="text-gray-600">
+                    {% if instructor.bio %}
+                        {{ instructor.bio }}
+                    {% else %}
+                        <span class="italic text-gray-400">No bio added yet.</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">My Courses</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {% for course_info in courses %}
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transform hover:scale-105 transition duration-300 w-84"> <!-- Increased width -->
+                    <div class="h-28 bg-cover bg-center" style="background-image: url({% if course_info.thumbnail %}{{ course_info.thumbnail.url }}{% else %}{% static 'ArtiQuityapp/default_thumbnail.jpg' %}{% endif %});"></div>
                     <div class="p-4">
-                        <h3 class="text-xl font-semibold text-[#2c3e50] mb-2">{{ course_info.course.title }}</h3>
-                        <p class="text-sm text-gray-600 mb-4">${{ course_info.course.price }}</p>
-
-                        <p class="text-sm text-gray-600 mb-4 relative group">
+                        <h3 class="text-base font-semibold text-[#2c3e50] mb-2">{{ course_info.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-2">${{ course_info.price }}</p>
+        
+                        <p class="text-sm text-gray-600 mb-2 relative group">
                             By:
-                           
-                            <a href="{% url 'instructor_profile' course_info.course.instructor.id %}" 
+                            <a href="{% url 'instructor_profile' course_info.instructor.id %}" 
                                class="text-blue-500 hover:text-blue-600 transition duration-300">
-                                {{ course_info.course.instructor.first_name }} {{ course_info.course.instructor.last_name }}
+                                {{ course_info.instructor.first_name }} {{ course_info.instructor.last_name }}
                             </a>
                             
                             <!-- Tooltip for Instructor Details -->
-                            <div class="absolute hidden group-hover:flex flex-col bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-50 w-64 mt-2">
-                                <div class="flex items-center space-x-4">
-                                    <img src="{% if course_info.course.instructor.profile_picture %}{{ course_info.course.instructor.profile_picture.url }}{% else %}{% static 'default_profile.png' %}{% endif %}" 
+                            <div class="absolute hidden group-hover:flex flex-col bg-white border border-gray-300 rounded-lg shadow-lg p-3 z-50 w-64 mt-2">
+                                <div class="flex items-center space-x-3">
+                                    <img src="{% if course_info.instructor.profile_picture %}{{ course_info.instructor.profile_picture.url }}{% else %}{% static 'default_profile.png' %}{% endif %}" 
                                          alt="Instructor Picture" 
-                                         class="w-16 h-16 rounded-full">
+                                         class="w-12 h-12 rounded-full">
                                     <div>
-                                        <h3 class="text-lg font-bold text-gray-800">{{ course_info.course.instructor.first_name }} {{ course_info.course.instructor.last_name }}</h3>
-                                        <p class="text-sm text-gray-600">{{ course_info.course.instructor.bio|truncatewords:10 }}</p>
+                                        <h3 class="text-sm font-bold text-gray-800">{{ course_info.instructor.first_name }} {{ course_info.instructor.last_name }}</h3>
+                                        <p class="text-xs text-gray-600">{{ course_info.instructor.bio|truncatewords:12 }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -151,32 +199,30 @@
                         <div class="flex items-center">
                             {% for i in star_range %}
                                 {% if course_info.average_rating >= i|add:"1" %}
-                                    <i class="fas fa-star text-yellow-400"></i>
+                                    <i class="fas fa-star text-yellow-400 text-sm"></i>
                                 {% else %}
-                                    <i class="far fa-star text-yellow-400"></i>
+                                    <i class="far fa-star text-yellow-400 text-sm"></i>
                                 {% endif %}
                             {% endfor %}
-                            <span class="ml-2 text-gray-600">({{ course_info.average_rating }}/5)</span>
+                            <p>Rating : </p>
+                            <span class="ml-2 text-gray-600 text-sm">({{ course_info.average_rating }}/5)</span>
                         </div>
                         <div class="flex justify-center mt-4 space-x-4">
-                           
-                                <a href="{% url 'course_detail' course_info.course.id course_info.first_lesson_id|default:0 %}" class="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#40dae2] transition duration-300">View Course</a>
-                            
-                            <a href="{% url 'add_to_cart' course_info.course.id %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Add to Cart</a>
+                            <a href="{% url 'course_detail' course_info.id course_info.first_lesson_id|default:0 %}" class="bg-[#2c3e50] text-white px-3 py-1.5 text-sm rounded-md hover:bg-[#40dae2] transition duration-300">View</a>
+                            <a href="{% url 'add_to_cart' course_info.id %}" class="bg-green-500 text-white px-3 py-1.5 text-sm rounded-md hover:bg-green-600 transition duration-300">Add</a>
                         </div>
                     </div>
                 </div>
-                {%endif%}
                 {% endfor %}
             </div>
-        </section>
-    </div>
-
-    <footer class="bg-[#77390c] shadow-md">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2024 ArtiQuity. All Rights Reserved.</p>
-            <a href="#" class="text-white hover:text-gray-300 mx-2">Privacy Policy</a> | 
-            <a href="#" class="text-white hover:text-gray-300 mx-2">Terms of Service</a>
+        </div>
+        
+        
+        
+    <!-- Footer -->
+    <footer class="bg-[#77390c] shadow-md mt-10">
+        <div class="container mx-auto text-center py-4">
+            <p class="text-white">&copy; 2024 ArtiQuity. All Rights Reserved.</p>
         </div>
     </footer>
 </body>

@@ -171,12 +171,15 @@ def student_dashboard(request):
     for course in courses:
         avg_rating = course.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
         course.average_rating = round(avg_rating, 1)
-        first_lesson = course.lessons.first()  # Get the first lesson, if it exists
-
+        first_lesson = course.lessons.first() 
+        instructor_id=course.instructor # Get the first lesson, if it exists
+       
+        print(instructor_id)
         course_data.append({
             'course': course,
             'first_lesson_id': first_lesson.id if first_lesson else None,
             'average_rating': course.average_rating,
+            'instructor':instructor_id,
         })
 
     star_range = range(5)  # For star display in the template
@@ -209,12 +212,18 @@ def create_course(request):
 
 @login_required
 def create_lesson(request, course_id):
+
     try:
         course = Course.objects.get(id=course_id, instructor=request.user)
-    except Course.DoesNotExist:
+        is_enrolled=Enrollment.objects.filter(course_id=course.id).count()
+        if is_enrolled>0:
+            
+            messages.error(request," You cannot add lessons to this course as students are currently enrolled in it ")
+            return redirect('instructor_dashboard')
+    except Course.DoesNotExist :
         messages.error(request, "Course not found or you do not have permission to add lessons to this course.")
         return redirect('instructor_dashboard')
-
+    
     if request.method == 'POST':
         form = LessonCreationForm(request.POST, request.FILES)
         if form.is_valid():
@@ -509,6 +518,9 @@ from django.shortcuts import get_object_or_404
 @login_required
 def edit_course(request, course_id):
     course = get_object_or_404(Course, id=course_id, instructor=request.user)
+    if course.status == 'approved':
+            messages.error(request, "You cannot edit a course that has already been approved.")
+            return redirect('instructor_dashboard')
     old_image_path = course.thumbnail.path if course.thumbnail else None
     if request.method == 'POST':
         form = CourseCreationForm(request.POST, request.FILES, instance=course)
@@ -562,7 +574,9 @@ def delete_course(request, course_id):
 def edit_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, course__instructor=request.user)
     old_video_path = lesson.video_file.path if lesson.video_file else None  # Store the path of the old video file
-    
+    if lesson.course.status == 'approved':
+        messages.error(request, "You cannot edit a lesson of a course that has been approved.")
+        return redirect('course_detail', lesson.course_id, lesson.id)  #
     if request.method == 'POST':
         form = LessonCreationForm(request.POST, request.FILES, instance=lesson)
         if form.is_valid():
@@ -590,6 +604,9 @@ def edit_lesson(request, lesson_id):
 
 def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, course__instructor=request.user)
+    if lesson.course.status == 'approved':
+        messages.error(request, "You cannot delete a lesson of a course that has been approved.")
+        return redirect('course_detail', lesson.course_id, lesson.id)  
     video_path = lesson.video_file.path if lesson.video_file else None  # Get the path of the video file
     left_lessons=Lesson.objects.filter(course_id=lesson.course_id)
     if request.method == 'POST':
@@ -687,8 +704,8 @@ def course_detail_view(request, course_id, lesson_id=None):
         visibility = True
 
     # Retrieve all lessons for the course
-    lessons = course.lessons.all()
-    
+   
+    lessons=course.lessons.all()
     # Determine the selected lesson; if lesson_id is not provided, use the first lesson
     selected_lesson = get_object_or_404(Lesson, id=lesson_id, course=course) if lesson_id else lessons.first()
     
@@ -1143,3 +1160,25 @@ def profile_view(request):
         'user': user,
     }
     return render(request, 'ArtiQuityapp/profile.html', context)
+
+def instructor_profile(request,instructor_id):
+    instructor= get_object_or_404(User, id=instructor_id)
+    courses=Course.objects.filter(instructor_id=instructor,status='approved')
+
+    course_count=Course.objects.filter(instructor_id=instructor,status='approved').count()
+    enrollment_count=0
+    for course in courses:
+        enrollments=Enrollment.objects.filter(course_id=course.id).count()
+        enrollment_count=enrollment_count+ enrollments
+        avg_rating = course.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        course.average_rating = round(avg_rating, 1)
+
+    context={
+            'user':request.user,
+            'instructor':instructor,
+            'course_count':course_count,
+            'enrollment_count':enrollment_count,
+            'courses':courses,
+            'average_rating':course.average_rating,
+        }
+    return render(request, 'ArtiQuityapp/instructor_profile.html',context)

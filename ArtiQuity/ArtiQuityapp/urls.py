@@ -39,5 +39,5 @@ urlpatterns = [
 
        path('certificate/<int:enrollment_id>/', views.generate_certificate_view, name='certificate_view'),
        path('profile/', views.profile_view, name='profile_view'),
-    
+      path('instructor_profile/<int:instructor_id>', views.instructor_profile, name='instructor_profile'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
