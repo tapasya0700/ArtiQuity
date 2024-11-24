@@ -742,6 +742,12 @@ def course_detail_view(request, course_id, lesson_id=None):
     if request.method == 'POST' and 'submit_review' in request.POST:
         review_form = ReviewForm(request.POST)
         if review_form.is_valid():
+        # Check if the student has already submitted a review for this course
+            existing_review = Review.objects.filter(student=request.user, course=course).exists()
+        if existing_review:
+            messages.error(request, 'You have already submitted a review for this course.')
+        else:
+            # Save the review if no existing review is found
             review = review_form.save(commit=False)
             review.student = request.user
             review.course = course
