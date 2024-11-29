@@ -52,8 +52,41 @@ def home(request):
         print("User is not logged in")
     return render(request,'ArtiQuityapp/home.html')
 def about(request):
-    return HttpResponse("Welcome to ArtiQuity")
+    return render(request,'ArtiQuityapp/about.html')
+def contact(request):
+    return render(request,'ArtiQuityapp/contact.html')
+def courses(request):
+    if(request.user):
+        if request.user.role=='student':
+                return redirect(student_dashboard)
+        else:
+            return redirect(instructor_dashboard)
+    else:
+        return redirect(user_login)
 
+def send_message(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        # Process the data (e.g., send an email or store it in the database)
+        try:
+            # Sending email (configure settings.EMAIL_HOST in your settings.py)
+            send_mail(
+                subject=f"Contact Form Submission from {name}",
+                message=f"Message:\n\n{message}\n\nFrom: {name} ({email})",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[settings.EMAIL_HOST_USER],  # Add your receiver email here
+            )
+            messages.success(request, "Your message has been sent successfully!")
+        except Exception as e:
+            print(f"Error: {e}")
+            messages.error(request, "There was an error sending your message. Please try again.")
+
+        return redirect('contact_page')  # Redirect back to the contact page
+
+    return render(request, 'ArtiQuityapp/contact.html')
 
 def custom_authenticate(username, password):
     try:
